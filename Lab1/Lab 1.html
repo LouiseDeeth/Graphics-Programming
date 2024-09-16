@@ -11,7 +11,7 @@
   </head>
 
   <body>
-    <canvas id="canvasOne" height="400" width="300"></canvas>
+    <canvas id="canvasOne" height="700" width="500"></canvas>
     <script type="text/javascript">
 		// Gets a handle to the element with id canvasOne.
       const canvas = document.getElementById("canvasOne");
@@ -28,6 +28,12 @@
 		// Create a filled rectangle 
       ctx.fillRect(10,100, 250,200);
       ctx.stroke();
+
+		  ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+      ctx.stroke(); 
+      ctx.fillRect(100,200, 250,200);
+      ctx.stroke();
+    
 
     </script>
   </body>
