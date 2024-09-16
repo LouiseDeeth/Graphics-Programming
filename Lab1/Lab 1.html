@@ -21,30 +21,36 @@
       ctx.font = "20px Georgia";
       ctx.strokeText("Louise Deeth", 10, 50);
       
-		  // Set the fill colour to bright red.
-		  ctx.fillStyle = "rgb(0, 0, 255)";
-      ctx.stroke();     
-
-		// Create a filled rectangle 
+		  //Create a filled rectangle and set the fill colour to blue and outline to red.
+		  ctx.fillStyle = "rgb(0, 0, 255)"; //blue fill   
       ctx.fillRect(10,100, 250,200);
-      ctx.stroke();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "red";
+      ctx.strokeRect(10,100, 250, 200); //outline the rectangle
 
-		  ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
-      ctx.stroke(); 
+		  //Create a filled rectangle and set the fill colour to green and outline to black.
+		  ctx.fillStyle = "rgba(0, 255, 0, 0.5)"; //green fill   
       ctx.fillRect(100,200, 250,200);
-      ctx.stroke();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(100,200, 250, 200); //outline the rectangle
     
-      //draw circle
+      //draw circle with green fill and blue outline 
       ctx.beginPath();
       ctx.arc(150, 550, 60, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+      ctx.fillStyle = "rgba(0, 255, 0, 0.5)"; //green fill
       ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "blue"; //blue outline
       ctx.stroke();
 
+      //draw second circle with red fill and yellow outline       
       ctx.beginPath();
       ctx.arc(150, 650, 60, 0, 2 * Math.PI);
-      ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+      ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; //red fill
       ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "yellow"; //yellow outline
       ctx.stroke();
 
     </script>
