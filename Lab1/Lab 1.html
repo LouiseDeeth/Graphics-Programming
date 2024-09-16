@@ -13,15 +13,15 @@
   <body>
     <canvas id="canvasOne" height="800" width="700"></canvas>
     <script type="text/javascript">
-		// Gets a handle to the element with id canvasOne.
+		  // Gets a handle to the element with id canvasOne.
       const canvas = document.getElementById("canvasOne");
 
-		// Set the canvas up for drawing in 2D.
+		  // Set the canvas up for drawing in 2D.
 		  const ctx = canvas.getContext("2d");
       ctx.font = "20px Georgia";
       ctx.strokeText("Louise Deeth", 10, 50);
       
-		// Set the fill colour to bright red.
+		  // Set the fill colour to bright red.
 		  ctx.fillStyle = "rgb(0, 0, 255)";
       ctx.stroke();     
 
@@ -37,10 +37,14 @@
       //draw circle
       ctx.beginPath();
       ctx.arc(150, 550, 60, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+      ctx.fill();
       ctx.stroke();
 
       ctx.beginPath();
       ctx.arc(150, 650, 60, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+      ctx.fill();
       ctx.stroke();
 
     </script>
