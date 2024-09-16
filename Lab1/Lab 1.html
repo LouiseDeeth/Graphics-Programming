@@ -11,7 +11,7 @@
   </head>
 
   <body>
-    <canvas id="canvasOne" height="700" width="500"></canvas>
+    <canvas id="canvasOne" height="800" width="700"></canvas>
     <script type="text/javascript">
 		// Gets a handle to the element with id canvasOne.
       const canvas = document.getElementById("canvasOne");
@@ -34,6 +34,14 @@
       ctx.fillRect(100,200, 250,200);
       ctx.stroke();
     
+      //draw circle
+      ctx.beginPath();
+      ctx.arc(150, 550, 60, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(150, 650, 60, 0, 2 * Math.PI);
+      ctx.stroke();
 
     </script>
   </body>
