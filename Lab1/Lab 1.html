@@ -62,6 +62,17 @@
       ctx.strokeStyle = "blue"; //blue outline
       ctx.stroke();
 
+      //draw three-quarters of a circle      
+      ctx.beginPath();
+      ctx.moveTo(450, 650); // move to the center of the circle
+      ctx.arc(450, 650, 60, 0, (3/2) * Math.PI); // 3 quarters of a circle - 270 degrees
+      ctx.closePath();
+      ctx.fillStyle = "rgba(0, 225, 0, 0.5)"; // light green fill
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "green"; //green outline
+      ctx.stroke();
+
     </script>
   </body>
 </html>
