@@ -46,11 +46,20 @@
 
       //draw second circle with red fill and yellow outline       
       ctx.beginPath();
-      ctx.arc(150, 650, 60, 0, 2 * Math.PI);
+      ctx.arc(180, 650, 60, 0, 2 * Math.PI);
       ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; //red fill
       ctx.fill();
       ctx.lineWidth = 4;
       ctx.strokeStyle = "yellow"; //yellow outline
+      ctx.stroke();
+
+      //draw semi-circle      
+      ctx.beginPath();
+      ctx.arc(450, 500, 60, 0, Math.PI); // half circle
+      ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; //red fill
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "blue"; //blue outline
       ctx.stroke();
 
     </script>
