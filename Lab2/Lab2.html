@@ -29,15 +29,19 @@
       // A function to repeat every time the animation loops.
       function repeatme() {
         // Draw the ball (stroked, not filled).
-        ctx.clearRect(0, 0, 500, 500);
+        ctx.clearRect(0, 0, 300, 300);
         ctx.beginPath();
-        ctx.arc(50, y, 3, 0, 2 * Math.PI);
+        ctx.arc(50, y, 10, 0, 2 * Math.PI);
         ctx.stroke();
         
         // Update the y location.
         y += 1;
         
         window.requestAnimationFrame(repeatme);
+
+        if (y >= 290){
+          y -= 1;
+        }
       }
       
       // Get the animation going.
