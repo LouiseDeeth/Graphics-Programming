@@ -16,7 +16,7 @@
   <body>
     <h1>Louise Deeth</h1>
 
-    <canvas id="canvas-for-ball" height="500" width="500"></canvas>  
+    <canvas id="canvas-for-ball" height="300" width="300"></canvas>  
  
     <script type="text/javascript">
       // Gets a handle to the element with id canvasOne.
@@ -29,7 +29,7 @@
       // A function to repeat every time the animation loops.
       function repeatme() {
         // Draw the ball (stroked, not filled).
-        ctx.clearRect(50, y, 500, 500);
+        ctx.clearRect(0, 0, 500, 500);
         ctx.beginPath();
         ctx.arc(50, y, 3, 0, 2 * Math.PI);
         ctx.stroke();
