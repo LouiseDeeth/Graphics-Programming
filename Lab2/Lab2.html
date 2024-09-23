@@ -13,13 +13,22 @@
   <body>
 
     <h1>Louise Deeth</h1>
-    <canvas id="canvasOne" height="900" width="800"></canvas>
+    <canvas id="canvasOne" height="500" width="500"></canvas>
     <script type="text/javascript">
 		  // Gets a handle to the element with id canvasOne.
       const canvas = document.getElementById("canvasOne");
 
 		  // Set the canvas up for drawing in 2D.
 		  const ctx = canvas.getContext("2d");
+
+      //draw circle with green fill and blue outline 
+      ctx.beginPath();
+      ctx.arc(50, 10, 7, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(0, 255, 0, 0.5)"; //green fill
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "blue"; //blue outline
+      ctx.stroke();
 
     </script>
   </body>
