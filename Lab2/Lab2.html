@@ -25,23 +25,41 @@
       var ctx = canvas.getContext("2d");
       
       // The vertical location of the ball.
-      var y = 10;
+      var yPos = 10;
+      var ySpeed = 1;
+
+      class Ball{
+        constructor(yPos, ySpeed){
+          this.yPos = yPos;
+          this.ySpeed = ySpeed;
+        }
+
+        draw(){
+          ctx.beginPath();
+          ctx.arc(50, this.yPos, 10, 0, 2 * Math.PI);
+          ctx.stroke();          
+        }
+
+        move(){
+          // Update the y location.
+          this.yPos += this.ySpeed;
+          
+          if (this.yPos > 290){
+            this.ySpeed = this.ySpeed * -1;
+          }
+        }
+      }
+
+      b1 = new Ball(15, 1);
+
       // A function to repeat every time the animation loops.
       function repeatme() {
-        // Draw the ball (stroked, not filled).
         ctx.clearRect(0, 0, 300, 300);
-        ctx.beginPath();
-        ctx.arc(50, y, 10, 0, 2 * Math.PI);
-        ctx.stroke();
-        
-        // Update the y location.
-        y += 1;
+        // Draw the ball (stroked, not filled).
+        b1.draw();
+        b1.move();
         
         window.requestAnimationFrame(repeatme);
-
-        if (y >= 290){
-          y -= 1;
-        }
       }
       
       // Get the animation going.
