@@ -45,7 +45,10 @@
           this.yPos += this.ySpeed;
           
           if (this.yPos > 290){
-            this.ySpeed = this.ySpeed * -1;
+            this.ySpeed = this.ySpeed * -1; //how fast the ball bounces back up
+          }
+          else if(this.yPos < 10){
+            this.ySpeed = this.ySpeed * -1; //how fast the ball bounces back down
           }
         }
       }
