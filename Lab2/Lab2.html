@@ -24,36 +24,46 @@
       // Get a 2D context for the canvas.
       var ctx = canvas.getContext("2d");
       
-      // The vertical location of the ball.
+      // The vertical & horizontal location of the ball.
       var yPos = 10;
       var ySpeed = 1;
+      var xPos = 50;
+      var xSpeed = 2;
 
       class Ball{
-        constructor(yPos, ySpeed){
+        constructor(xPos, yPos, xSpeed, ySpeed){
+          this.xPos = xPos;         
           this.yPos = yPos;
+          this.xSpeed = xSpeed;
           this.ySpeed = ySpeed;
         }
 
+        //draw method
         draw(){
           ctx.beginPath();
-          ctx.arc(50, this.yPos, 10, 0, 2 * Math.PI);
+          ctx.arc(this.xPos, this.yPos, 10, 0, 2 * Math.PI);
           ctx.stroke();          
         }
 
+        //move method
         move(){
           // Update the y location.
           this.yPos += this.ySpeed;
-          
-          if (this.yPos > 290){
+          this.xPos += this.xSpeed;
+
+          //Bounce off the top & bottom
+          if (this.yPos > 290 || this.yPos < 10){
             this.ySpeed = this.ySpeed * -1; //how fast the ball bounces back up
           }
-          else if(this.yPos < 10){
-            this.ySpeed = this.ySpeed * -1; //how fast the ball bounces back down
+          //Bounce off the left & right
+          if(this.xPos > 290 || this.xPos < 10){
+            this.xSpeed = this.xSpeed * -1; //how fast the ball bounces back down
           }
         }
       }
 
-      b1 = new Ball(15, 1);
+      //Create the ball with initial positions and speed
+      var b1 = new Ball(50, 15, 2, 1);
 
       // A function to repeat every time the animation loops.
       function repeatme() {
