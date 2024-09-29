@@ -31,18 +31,35 @@
       var xSpeed = 2;
 
       class Ball{
-        constructor(xPos, yPos, xSpeed, ySpeed){
+        constructor(xPos, yPos, xSpeed, ySpeed, radius = 20){
           this.xPos = xPos;         
           this.yPos = yPos;
           this.xSpeed = xSpeed;
           this.ySpeed = ySpeed;
+          this.radius = radius; //the radius of the peace sign
         }
 
-        //draw method
+        //Convert degrees to radians
+        //To change from radians to degrees, you need to multiply the number of radians by 180/π.
+        //To convert from degrees to radians, multiply the number of degrees by π/180.
+        toRadians(degrees){
+          return degrees * Math.PI / 180;
+        }
+
+        //Draw method
         draw(){
           ctx.beginPath();
-          ctx.arc(this.xPos, this.yPos, 20, 0, 2 * Math.PI);
-          ctx.stroke();          
+          ctx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);//outer circle
+          ctx.stroke();       
+         
+        //draw the centre line
+        ctx.beginPath();
+        ctx.moveTo(this.xPos, this.yPos - this.radius);
+        ctx.lineTo(this.xPos, this.yPos + this.radius);       
+        ctx.stroke();       
+                
+
+
         }
 
         //move method
