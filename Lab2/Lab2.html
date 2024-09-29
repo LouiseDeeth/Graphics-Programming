@@ -23,12 +23,6 @@
       var canvas = document.getElementById("canvas-for-ball");
       // Get a 2D context for the canvas.
       var ctx = canvas.getContext("2d");
-      
-      // The vertical & horizontal location of the ball.
-      var yPos = 150;
-      var ySpeed = 3;
-      var xPos = 50;
-      var xSpeed = 2;
 
       class Ball{
         constructor(xPos, yPos, xSpeed, ySpeed, radius = 20){
@@ -37,6 +31,9 @@
           this.xSpeed = xSpeed;
           this.ySpeed = ySpeed;
           this.radius = radius; //the radius of the peace sign
+          this.rotation = 0; //initial rotation in radians
+          this.rotationSpeed = 0.1; // how fast the rotation happens  
+          this.isRotatingClockwise = true; //initial direction of rotation
         }
 
         //Convert degrees to radians
@@ -48,35 +45,42 @@
 
         //Draw method
         draw(){
+          ctx.save();
+          ctx.translate(this.xPos, this.yPos);
+          ctx.rotate(this.rotation);
+
+          //draw the outer circle
           ctx.beginPath();
-          ctx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);//outer circle
+          ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
           ctx.stroke();       
          
-        //draw the centre line
-        ctx.beginPath();
-        ctx.moveTo(this.xPos, this.yPos - this.radius);
-        ctx.lineTo(this.xPos, this.yPos + this.radius);       
-        ctx.stroke();       
+          //draw the centre line
+          ctx.beginPath();
+          ctx.moveTo(0, -this.radius);
+          ctx.lineTo(0, this.radius);       
+          ctx.stroke();       
 
-        //draw the left line
-        let angleL = this.toRadians(135); 
-        let xLeft = this.xPos + this.radius * Math.cos(angleL);
-        let yLeft = this.yPos + this.radius * Math.sin(angleL);
-        ctx.beginPath();
-        ctx.moveTo(this.xPos, this.yPos);
-        ctx.lineTo(xLeft, yLeft);       
-        ctx.stroke();       
+          //draw the left line
+          let angleL = this.toRadians(135); 
+          let xLeft = this.radius * Math.cos(angleL);
+          let yLeft = this.radius * Math.sin(angleL);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(xLeft, yLeft);       
+          ctx.stroke();       
 
-        //draw the right line
-        let angleR = this.toRadians(45); 
-        let xRight = this.xPos + this.radius * Math.cos(angleR);
-        let yRight = this.yPos + this.radius * Math.sin(angleR);
-        ctx.beginPath();
-        ctx.moveTo(this.xPos, this.yPos);
-        ctx.lineTo(xRight, yRight);       
-        ctx.stroke();       
+          //draw the right line
+          let angleR = this.toRadians(45); 
+          let xRight = this.radius * Math.cos(angleR);
+          let yRight = this.radius * Math.sin(angleR);
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(xRight, yRight);       
+          ctx.stroke();       
 
-        }
+          this.rotation += (this.isRotatingClockwise ? this.rotationSpeed : -this.rotationSpeed);
+          ctx.restore();
+          }
 
         //move method
         move(){
@@ -85,12 +89,14 @@
           this.xPos += this.xSpeed;
 
           //Bounce off the top & bottom
-          if (this.yPos > (300 - 20) || this.yPos < 20){
-            this.ySpeed = this.ySpeed * -1; //how fast the ball bounces back up
+          if (this.yPos > (300 - this.radius) || this.yPos < this.radius){
+            this.ySpeed = this.ySpeed * -1; //reverse y direction
+            this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
           }
           //Bounce off the left & right
-          if(this.xPos > (300 - 20) || this.xPos < 20){
-            this.xSpeed = this.xSpeed * -1; //how fast the ball bounces back down
+          if(this.xPos > (300 - this.radius) || this.xPos < this.radius){
+            this.xSpeed = this.xSpeed * -1; //reverse x direction
+            this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
           }
         }
       }
@@ -100,11 +106,9 @@
 
       // A function to repeat every time the animation loops.
       function repeatme() {
-        ctx.clearRect(0, 0, 300, 300);
-        // Draw the ball (stroked, not filled).
-        b1.draw();
-        b1.move();
-        
+        ctx.clearRect(0, 0, 300, 300); //Clear the canvas
+        b1.draw(); // Draw the ball (stroked, not filled).
+        b1.move(); // Move the ball
         window.requestAnimationFrame(repeatme);
       }
       
@@ -113,5 +117,4 @@
     </script>
 
   </body>
-
 </html>
