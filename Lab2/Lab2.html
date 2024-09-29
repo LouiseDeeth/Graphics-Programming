@@ -57,8 +57,24 @@
         ctx.moveTo(this.xPos, this.yPos - this.radius);
         ctx.lineTo(this.xPos, this.yPos + this.radius);       
         ctx.stroke();       
-                
 
+        //draw the left line
+        let angleL = this.toRadians(135); 
+        let xLeft = this.xPos + this.radius * Math.cos(angleL);
+        let yLeft = this.yPos + this.radius * Math.sin(angleL);
+        ctx.beginPath();
+        ctx.moveTo(this.xPos, this.yPos);
+        ctx.lineTo(xLeft, yLeft);       
+        ctx.stroke();       
+
+        //draw the right line
+        let angleR = this.toRadians(45); 
+        let xRight = this.xPos + this.radius * Math.cos(angleR);
+        let yRight = this.yPos + this.radius * Math.sin(angleR);
+        ctx.beginPath();
+        ctx.moveTo(this.xPos, this.yPos);
+        ctx.lineTo(xRight, yRight);       
+        ctx.stroke();       
 
         }
 
