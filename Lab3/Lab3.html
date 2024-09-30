@@ -8,7 +8,7 @@
           background-color: white;
       }
       canvas {
-            border:1px solid #000000;
+          border:1px solid #000000;
       }
     </style>
   </head>
@@ -35,6 +35,12 @@
           this.rotationSpeed = 0.1; // how fast the rotation happens  
           this.isRotatingClockwise = true; //initial direction of rotation
         }
+
+      //class Paddle{
+        //constructor(x, y)
+         // this.x = x;         
+        //  this.y = y;        
+   //   }
 
         //Convert degrees to radians
         //To change from radians to degrees, you need to multiply the number of radians by 180/π.
@@ -114,6 +120,18 @@
       
       // Get the animation going.
       repeatme();
+
+    //get offset
+        var canvasPosition = {
+        x:canvas.offsetLeft,
+        y:canvas.offsetTop
+      };
+     
+      canvas.addEventListener("click", function(event) { 
+        ctx.beginPath();
+        ctx.arc(event.clientX - canvasPosition.x, event.clientY - canvasPosition.y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+
     </script>
 
   </body>
