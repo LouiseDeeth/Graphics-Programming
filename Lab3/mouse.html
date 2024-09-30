@@ -34,6 +34,7 @@
         y:canvas.offsetTop
         };
 
+      //Change mouse.html to draw the circle at (event.clientX, event.clientY), rather than (50, 50).
       canvas.addEventListener("click", function(event) { 
         ctx.beginPath();
         ctx.arc(event.clientX - canvasPosition.x, event.clientY - canvasPosition.y, 6, 0, 2 * Math.PI);
