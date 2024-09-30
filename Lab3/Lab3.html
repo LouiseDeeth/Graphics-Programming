@@ -1,147 +1,182 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <title>Canvas</title>
     <style type="text/css">
-      body {
-          background-color: white;
-      }
-      canvas {
-          border:1px solid #000000;
-      }
-    </style>
-  </head>
+        body {
+            background-color: white;
+        }
 
-  <body>
+        canvas {
+            border: 1px solid #000000;
+        }
+    </style>
+</head>
+
+<body>
     <h1>Louise Deeth</h1>
 
-    <canvas id="canvas-for-ball" height="300" width="300"></canvas>  
- 
-    <script type="text/javascript">
-      // Gets a handle to the element with id canvasOne.
-      var canvas = document.getElementById("canvas-for-ball");
-      // Get a 2D context for the canvas.
-      var ctx = canvas.getContext("2d");
+    <canvas id="canvas-for-ball" height="300" width="300"></canvas>
 
-      class Ball{
-        constructor(xPos, yPos, xSpeed, ySpeed, radius = 20){
-          this.xPos = xPos;         
-          this.yPos = yPos;
-          this.xSpeed = xSpeed;
-          this.ySpeed = ySpeed;
-          this.radius = radius; //the radius of the peace sign
-          this.rotation = 0; //initial rotation in radians
-          this.rotationSpeed = 0.1; // how fast the rotation happens  
-          this.isRotatingClockwise = true; //initial direction of rotation
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js">
+        // Gets a handle to the element with id canvasOne.
+        var canvas = document.getElementById("canvas-for-ball");
+        // Get a 2D context for the canvas.
+        var ctx = canvas.getContext("2d");
+
+        class Ball {
+            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
+                this.xPos = xPos;
+                this.yPos = yPos;
+                this.xSpeed = xSpeed;
+                this.ySpeed = ySpeed;
+                this.radius = radius; //the radius of the peace sign
+                this.rotation = 0; //initial rotation in radians
+                this.rotationSpeed = 0.1; // how fast the rotation happens  
+                this.isRotatingClockwise = true; //initial direction of rotation
+            }
+
+            //class Paddle{
+            //constructor(x, y)
+            // this.x = x;         
+            //  this.y = y;        
+            //   }
+
+            //Convert degrees to radians
+            //To change from radians to degrees, you need to multiply the number of radians by 180/π.
+            //To convert from degrees to radians, multiply the number of degrees by π/180.
+            toRadians(degrees) {
+                return degrees * Math.PI / 180;
+            }
+
+            //Draw method
+            draw() {
+                ctx.save();
+                ctx.translate(this.xPos, this.yPos);
+                ctx.rotate(this.rotation);
+
+                //draw the outer circle
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
+                ctx.stroke();
+
+                //draw the centre line
+                ctx.beginPath();
+                ctx.moveTo(0, -this.radius);
+                ctx.lineTo(0, this.radius);
+                ctx.stroke();
+
+                //draw the left line
+                let angleL = this.toRadians(135);
+                let xLeft = this.radius * Math.cos(angleL);
+                let yLeft = this.radius * Math.sin(angleL);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(xLeft, yLeft);
+                ctx.stroke();
+
+                //draw the right line
+                let angleR = this.toRadians(45);
+                let xRight = this.radius * Math.cos(angleR);
+                let yRight = this.radius * Math.sin(angleR);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(xRight, yRight);
+                ctx.stroke();
+
+                this.rotation += (this.isRotatingClockwise ? this.rotationSpeed : -this.rotationSpeed);
+                ctx.restore();
+            }
+
+            //move method
+            move() {
+                // Update the y location.
+                this.yPos += this.ySpeed;
+                this.xPos += this.xSpeed;
+
+                //Bounce off the top & bottom
+                if (this.yPos > (300 - this.radius) || this.yPos < this.radius) {
+                    this.ySpeed = this.ySpeed * -1; //reverse y direction
+                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
+                }
+                //Bounce off the left & right
+                if (this.xPos > (300 - this.radius) || this.xPos < this.radius) {
+                    this.xSpeed = this.xSpeed * -1; //reverse x direction
+                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
+                }
+            }
         }
 
-      //class Paddle{
-        //constructor(x, y)
-         // this.x = x;         
-        //  this.y = y;        
-   //   }
+        //Create the ball with initial positions and speed
+        var b1 = new Ball(50, 150, 2, 3);
 
-        //Convert degrees to radians
-        //To change from radians to degrees, you need to multiply the number of radians by 180/π.
-        //To convert from degrees to radians, multiply the number of degrees by π/180.
-        toRadians(degrees){
-          return degrees * Math.PI / 180;
+        // A function to repeat every time the animation loops.
+        function repeatme() {
+            ctx.clearRect(0, 0, 300, 300); //Clear the canvas
+            b1.draw(); // Draw the ball (stroked, not filled).
+            b1.move(); // Move the ball
+            window.requestAnimationFrame(repeatme);
         }
 
-        //Draw method
-        draw(){
-          ctx.save();
-          ctx.translate(this.xPos, this.yPos);
-          ctx.rotate(this.rotation);
+        // Get the animation going.
+        repeatme();
 
-          //draw the outer circle
-          ctx.beginPath();
-          ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
-          ctx.stroke();       
-         
-          //draw the centre line
-          ctx.beginPath();
-          ctx.moveTo(0, -this.radius);
-          ctx.lineTo(0, this.radius);       
-          ctx.stroke();       
+        //get offset
+        var canvasPosition = {
+            x: canvas.offsetLeft,
+            y: canvas.offsetTop
+        };
 
-          //draw the left line
-          let angleL = this.toRadians(135); 
-          let xLeft = this.radius * Math.cos(angleL);
-          let yLeft = this.radius * Math.sin(angleL);
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(xLeft, yLeft);       
-          ctx.stroke();       
+        canvas.addEventListener("click", function (event) {
+            var mouse = {
+                x: event.clientX - canvasPosition.x,
+                y: event.clientY - canvasPosition.y
+            }
 
-          //draw the right line
-          let angleR = this.toRadians(45); 
-          let xRight = this.radius * Math.cos(angleR);
-          let yRight = this.radius * Math.sin(angleR);
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(xRight, yRight);       
-          ctx.stroke();       
+            ctx.beginPath();
+            ctx.arc(mouse.x, mouse.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
 
-          this.rotation += (this.isRotatingClockwise ? this.rotationSpeed : -this.rotationSpeed);
-          ctx.restore();
-        }
+            //log where mouse click on console
+            console.log(mouse.x + " :: " + mouse.y);
+        });
 
-        //move method
-        move(){
-          // Update the y location.
-          this.yPos += this.ySpeed;
-          this.xPos += this.xSpeed;
+        // Add a Javascript event listener to the keypress event.
+        window.addEventListener("keypress", function (event) {
+            // Just log the event to the console.
+            console.log(event);
+        });
 
-          //Bounce off the top & bottom
-          if (this.yPos > (300 - this.radius) || this.yPos < this.radius){
-            this.ySpeed = this.ySpeed * -1; //reverse y direction
-            this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
-          }
-          //Bounce off the left & right
-          if(this.xPos > (300 - this.radius) || this.xPos < this.radius){
-            this.xSpeed = this.xSpeed * -1; //reverse x direction
-            this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
-          }
-        }
-      }
+        //keypresses with jQuery
+        $(document.body).on('keydown', function (e) {
+            console.log(e.which);
+            switch (e.which) {
+                // key code for left arrow
+                case 37:
+                    console.log('left arrow key pressed!');
+                    break;
 
-      //Create the ball with initial positions and speed
-      var b1 = new Ball(50, 150, 2, 3);
+                // key code for up arrow
+                case 38:
+                    console.log('up arrow key pressed!');
+                    break;
 
-      // A function to repeat every time the animation loops.
-      function repeatme() {
-        ctx.clearRect(0, 0, 300, 300); //Clear the canvas
-        b1.draw(); // Draw the ball (stroked, not filled).
-        b1.move(); // Move the ball
-        window.requestAnimationFrame(repeatme);
-      }
-      
-      // Get the animation going.
-      repeatme();
+                // key code for right arrow
+                case 39:
+                    console.log('right arrow key pressed!');
+                    break;
 
-      //get offset
-      var canvasPosition = {
-        x:canvas.offsetLeft,
-        y:canvas.offsetTop
-      };
-     
-      canvas.addEventListener("click", function(event) { 
-        var mouse = {
-          x:event.clientX - canvasPosition.x,
-          y:event.clientY - canvasPosition.y
-      }
-
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 6, 0, 2 * Math.PI);
-        ctx.fill();
-        
-        //log where mouse click on console
-        console.log(mouse.x + " :: " +  mouse.y);
-      });
+                // key code for down arrow
+                case 40:
+                    console.log('down arrow key pressed!');
+                    break;
+            }
+        });
 
     </script>
 
-  </body>
+</body>
+
 </html>
