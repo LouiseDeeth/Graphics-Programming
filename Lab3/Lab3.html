@@ -121,16 +121,25 @@
       // Get the animation going.
       repeatme();
 
-    //get offset
-        var canvasPosition = {
+      //get offset
+      var canvasPosition = {
         x:canvas.offsetLeft,
         y:canvas.offsetTop
       };
      
       canvas.addEventListener("click", function(event) { 
+        var mouse = {
+          x:event.clientX - canvasPosition.x,
+          y:event.clientY - canvasPosition.y
+      }
+
         ctx.beginPath();
-        ctx.arc(event.clientX - canvasPosition.x, event.clientY - canvasPosition.y, 6, 0, 2 * Math.PI);
+        ctx.arc(mouse.x, mouse.y, 6, 0, 2 * Math.PI);
         ctx.fill();
+        
+        //log where mouse click on console
+        console.log(mouse.x + " :: " +  mouse.y);
+      });
 
     </script>
 
