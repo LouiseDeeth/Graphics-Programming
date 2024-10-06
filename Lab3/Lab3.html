@@ -38,12 +38,6 @@
                 this.isRotatingClockwise = true; //initial direction of rotation
             }
 
-            //class Paddle{
-            //constructor(x, y)
-            // this.x = x;         
-            //  this.y = y;        
-            //   }
-
             //Convert degrees to radians
             //To change from radians to degrees, you need to multiply the number of radians by 180/π.
             //To convert from degrees to radians, multiply the number of degrees by π/180.
@@ -106,6 +100,20 @@
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
                 }
+            }
+        }
+        
+        class Paddle{
+            constructor(x, y, width = 10, height = 60) {
+                this.x = x;         
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.ySpeed = 5;
+            }
+            
+            draw(){
+                ctx.fillRect(this.x, this.y, this.width, this.height);
             }
         }
 
