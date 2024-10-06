@@ -20,7 +20,9 @@
 
     <canvas id="canvas-for-ball" height="300" width="300"></canvas>
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+    <script type="text/javascript">    
         // Gets a handle to the element with id canvasOne.
         var canvas = document.getElementById("canvas-for-ball");
         // Get a 2D context for the canvas.
@@ -115,16 +117,23 @@
             draw(){
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
+
+            move(){
+
+            }
         }
 
         //Create the ball with initial positions and speed
         var b1 = new Ball(50, 150, 2, 3);
+        //Create right paddle rectangle
+        var rightPaddle = new Paddle(280, 120);
 
         // A function to repeat every time the animation loops.
         function repeatme() {
             ctx.clearRect(0, 0, 300, 300); //Clear the canvas
             b1.draw(); // Draw the ball (stroked, not filled).
             b1.move(); // Move the ball
+            rightPaddle.draw();// Draw the right paddle
             window.requestAnimationFrame(repeatme);
         }
 
@@ -161,25 +170,28 @@
         $(document.body).on('keydown', function (e) {
             console.log(e.which);
             switch (e.which) {
-                // key code for left arrow
-                case 37:
-                    console.log('left arrow key pressed!');
-                    break;
 
-                // key code for up arrow
+                // key code for up arrow for the right paddle
                 case 38:
+                    rightPaddle.move('up');
                     console.log('up arrow key pressed!');
                     break;
 
-                // key code for right arrow
-                case 39:
-                    console.log('right arrow key pressed!');
-                    break;
-
-                // key code for down arrow
+                // key code for down arrow for the right paddle
                 case 40:
+                    rightPaddle.move('down');
                     console.log('down arrow key pressed!');
                     break;
+
+                // key code for up arrow for the left paddle
+                //case 39:
+                //    console.log('right arrow key pressed!');
+                //    break;
+                // key code for down arrow for the left paddle
+                //case 37:
+                //    console.log('left arrow key pressed!');
+                //    break;
+
             }
         });
 
