@@ -127,6 +127,8 @@
         var b1 = new Ball(50, 150, 2, 3);
         //Create right paddle rectangle
         var rightPaddle = new Paddle(280, 120);
+        //Create left paddle rectangle
+        var leftPaddle = new Paddle(10, 120);
 
         // A function to repeat every time the animation loops.
         function repeatme() {
@@ -134,6 +136,7 @@
             b1.draw(); // Draw the ball (stroked, not filled).
             b1.move(); // Move the ball
             rightPaddle.draw();// Draw the right paddle
+            leftPaddle.draw();// Draw the left paddle
             window.requestAnimationFrame(repeatme);
         }
 
@@ -184,13 +187,15 @@
                     break;
 
                 // key code for up arrow for the left paddle
-                //case 39:
-                //    console.log('right arrow key pressed!');
-                //    break;
+                case 87:
+                    console.log('w key pressed!');
+                    leftPaddle.move('up');
+                    break;
                 // key code for down arrow for the left paddle
-                //case 37:
-                //    console.log('left arrow key pressed!');
-                //    break;
+                case 83:
+                    console.log('s key pressed!');
+                    leftPaddle.move('down');
+                    break;
 
             }
         });
