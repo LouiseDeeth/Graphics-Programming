@@ -18,12 +18,15 @@
 <body>
     <h1>Louise Deeth</h1>
 
-    <canvas id="canvas-for-ball" height="300" width="300"></canvas>
+    <canvas id="canvas-for-ball"></canvas>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <script type="text/javascript">    
         // Gets a handle to the element with id canvasOne.
         var canvas = document.getElementById("canvas-for-ball");
+        //Set height and width of canvas
+        canvas.height = 400;
+        canvas.width = 500;
         // Get a 2D context for the canvas.
         var ctx = canvas.getContext("2d");
 
@@ -91,7 +94,21 @@
                     this.yPos + this.radius > paddle.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
                 ) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
+
+                    // move ball away from paddle
+                    if(this.xSpeed > 0){
+                        this.xPos = paddle.x + paddle.width + this.radius + 5;
+                    }
+                    else{
+                        this.xPos = paddle.x - this.radius - 5;
+                    }
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
+
+                    // check if ball is stuch behind paddle amd fix
+                    if(this.xPos < 0 || this.xPos > canvas.width){
+                        this.xSpeed = this.xSpeed * -1; //reverse x direction again
+                        this.xPos = (this.xPos<0) ? this.radius : canvas.width - this.radius; 
+                    }
                 }
             }  
 
@@ -102,12 +119,12 @@
                 this.xPos += this.xSpeed;
 
                 //Bounce off the top & bottom
-                if (this.yPos > (300 - this.radius) || this.yPos < this.radius) {
+                if (this.yPos > (canvas.height - this.radius) || this.yPos < this.radius) {
                     this.ySpeed = this.ySpeed * -1; //reverse y direction
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
                 }
                 //Bounce off the left & right
-                if (this.xPos > (300 - this.radius) || this.xPos < this.radius) {
+                if (this.xPos > (canvas.width - this.radius) || this.xPos < this.radius) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
                 } 
@@ -134,7 +151,7 @@
                 if(direction === 'up' && this.y > 0){
                     this.y -= this.ySpeed;
                 }
-                else if(direction === 'down' && this.y + this.height < 300){
+                else if(direction === 'down' && this.y + this.height < canvas.height){
                     this.y += this.ySpeed;
                 } 
             }
@@ -142,14 +159,14 @@
 
         //Create the ball with initial positions and speed
         var b1 = new Ball(50, 150, 2, 1);
-        //Create right paddle rectangle
-        var rightPaddle = new Paddle(280, 120);
-        //Create left paddle rectangle
-        var leftPaddle = new Paddle(10, 120);
+        //Create right paddle rectangle and center based on canvas height
+        var rightPaddle = new Paddle(canvas.width - 20, (canvas.height / 2) -30);
+        //Create left paddle rectangle and center based on canvas height
+        var leftPaddle = new Paddle(10, (canvas.height / 2) -30);
 
         // A function to repeat every time the animation loops.
         function repeatme() {
-            ctx.clearRect(0, 0, 300, 300); //Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
             b1.draw(); // Draw the ball (stroked, not filled).
             b1.move(leftPaddle, rightPaddle); // Move the ball with paddles
             rightPaddle.draw();// Draw the right paddle
