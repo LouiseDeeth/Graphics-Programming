@@ -240,6 +240,16 @@
                 case 189:
                     b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
                     break;
+                
+                // change rotation direction with c
+                case 67:
+                    b1.isRotatingClockwise = !b1.isRotatingClockwise;
+                    break;    
+
+                //Reset rotation speed to default with r
+                case 82:
+                    b1.rotationSpeed = 0.1;
+                    break    
             }
         });
 
