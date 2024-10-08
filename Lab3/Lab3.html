@@ -153,6 +153,9 @@
                     this.y += this.ySpeed;
                 } 
             }
+            moveTo(y){
+                this.y = Math.min(Math.max(0, y - this.height / 2), canvas.height - this.height);
+            }
         }
 
         //Create the ball with initial positions and speed
@@ -186,13 +189,11 @@
                 x: event.clientX - canvasPosition.x,
                 y: event.clientY - canvasPosition.y
             }
-
-            ctx.beginPath();
-            ctx.arc(mouse.x, mouse.y, 6, 0, 2 * Math.PI);
-            ctx.fill();
+            //Move the paddle to the y coordinate
+            rightPaddle.moveTo(mouse.y);
 
             //log where mouse click on console
-            console.log(mouse.x + " :: " + mouse.y);
+            console.log("Paddle move to: " + mouse.y);
         });
 
         // Add a Javascript event listener to the keypress event.
@@ -228,6 +229,16 @@
                 case 83:
                     leftPaddle.move('down');
                     console.log('s key pressed!');
+                    break;
+
+                //Increase rotation speed with +
+                case 187:
+                    b1.rotationSpeed += 0.05;
+                    break;
+
+                //Decrease rotation speed with -
+                case 189:
+                    b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
                     break;
             }
         });
