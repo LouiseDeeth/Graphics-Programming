@@ -21,7 +21,6 @@
     <canvas id="canvas-for-ball" height="300" width="300"></canvas>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-
     <script type="text/javascript">    
         // Gets a handle to the element with id canvasOne.
         var canvas = document.getElementById("canvas-for-ball");
@@ -86,8 +85,18 @@
                 ctx.restore();
             }
 
-            //move method
-            move() {
+            //Check if ball touches paddles
+            checkPaddleHit(paddle){
+                if(
+                    this.yPos + this.radius > paddle.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
+                ) {
+                    this.xSpeed = this.xSpeed * -1; //reverse x direction
+                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
+                }
+            }  
+
+            //move method for ball
+            move(leftPaddle, rightPaddle) {
                 // Update the y location.
                 this.yPos += this.ySpeed;
                 this.xPos += this.xSpeed;
@@ -101,7 +110,10 @@
                 if (this.xPos > (300 - this.radius) || this.xPos < this.radius) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
-                }
+                } 
+                // Bounce off paddles
+                this.checkPaddleHit(leftPaddle);
+                this.checkPaddleHit(rightPaddle);          
             }
         }
         
@@ -111,20 +123,25 @@
                 this.y = y;
                 this.width = width;
                 this.height = height;
-                this.ySpeed = 5;
+                this.ySpeed = 25;
             }
             
             draw(){
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
 
-            move(){
-
+            move(direction){
+                if(direction === 'up' && this.y > 0){
+                    this.y -= this.ySpeed;
+                }
+                else if(direction === 'down' && this.y + this.height < 300){
+                    this.y += this.ySpeed;
+                } 
             }
         }
 
         //Create the ball with initial positions and speed
-        var b1 = new Ball(50, 150, 2, 3);
+        var b1 = new Ball(50, 150, 2, 1);
         //Create right paddle rectangle
         var rightPaddle = new Paddle(280, 120);
         //Create left paddle rectangle
@@ -134,7 +151,7 @@
         function repeatme() {
             ctx.clearRect(0, 0, 300, 300); //Clear the canvas
             b1.draw(); // Draw the ball (stroked, not filled).
-            b1.move(); // Move the ball
+            b1.move(leftPaddle, rightPaddle); // Move the ball with paddles
             rightPaddle.draw();// Draw the right paddle
             leftPaddle.draw();// Draw the left paddle
             window.requestAnimationFrame(repeatme);
@@ -188,15 +205,15 @@
 
                 // key code for up arrow for the left paddle
                 case 87:
-                    console.log('w key pressed!');
                     leftPaddle.move('up');
-                    break;
-                // key code for down arrow for the left paddle
-                case 83:
-                    console.log('s key pressed!');
-                    leftPaddle.move('down');
+                    console.log('w key pressed!');
                     break;
 
+                // key code for down arrow for the left paddle
+                case 83:
+                    leftPaddle.move('down');
+                    console.log('s key pressed!');
+                    break;
             }
         });
 
