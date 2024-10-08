@@ -39,6 +39,8 @@
                 this.initialXSpeed = xSpeed;
                 this.initialYSpeed = ySpeed;
                 this.radius = radius; //the radius of the peace sign
+                this.gravity = 0.2; 
+                this.bounceloss = 0.9; // 90% loss in bounce
                 this.rotation = 0; //initial rotation in radians
                 this.rotationSpeed = 0.1; // how fast the rotation happens  
                 this.isRotatingClockwise = true; //initial direction of rotation
@@ -122,14 +124,25 @@
 
             //move method for ball
             move(leftPaddle, rightPaddle) {
+                //Apply gravity
+                this.ySpeed += this.gravity;
+
                 // Update the y location.
                 this.yPos += this.ySpeed;
                 this.xPos += this.xSpeed;
 
-                //Bounce off the top & bottom
-                if (this.yPos > (canvas.height - this.radius) || this.yPos < this.radius) {
+                //Bounce off the top
+                if (this.yPos < this.radius) {
+                    this.ySpeed = this.radius;
                     this.ySpeed = this.ySpeed * -1; //reverse y direction
                 }
+
+                //Bounce off the bottom and apply bounce loss
+                if (this.yPos > canvas.height - this.radius) {
+                    this.yPos = canvas.height - this.radius;
+                    this.ySpeed = this.ySpeed * -1; //reverse y direction
+                }
+
                 //Bounce off the left & right
                 if (this.xPos > (canvas.width - this.radius) || this.xPos < this.radius) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
