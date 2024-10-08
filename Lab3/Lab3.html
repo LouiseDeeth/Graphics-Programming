@@ -36,6 +36,8 @@
                 this.yPos = yPos;
                 this.xSpeed = xSpeed;
                 this.ySpeed = ySpeed;
+                this.initialXSpeed = xSpeed;
+                this.initialYSpeed = ySpeed;
                 this.radius = radius; //the radius of the peace sign
                 this.rotation = 0; //initial rotation in radians
                 this.rotationSpeed = 0.1; // how fast the rotation happens  
@@ -111,6 +113,12 @@
                     }
                 }
             }  
+
+            //Increase speed of ball
+            increaseSpeed(){
+                this.xSpeed *= 1.1; //increase x speed by 10%
+                this.ySpeed *= 1.1; //increase y speed by 10%
+            }
 
             //move method for ball
             move(leftPaddle, rightPaddle) {
@@ -241,15 +249,23 @@
                     b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
                     break;
                 
+                //Increase ball speed with b
+                case 66:
+                    b1.increaseSpeed();
+                    console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed)   ;
+                    break;
+                                        
                 // change rotation direction with c
                 case 67:
                     b1.isRotatingClockwise = !b1.isRotatingClockwise;
                     break;    
 
-                //Reset rotation speed to default with r
+                //Reset rotation speed and ball speed to default with r
                 case 82:
                     b1.rotationSpeed = 0.1;
-                    break    
+                    b1.xSpeed = b1.initialXSpeed;
+                    b1.ySpeed = b1.initialYSpeed;
+                    break   
             }
         });
 
