@@ -39,8 +39,6 @@
                 this.initialXSpeed = xSpeed;
                 this.initialYSpeed = ySpeed;
                 this.radius = radius; //the radius of the peace sign
-                this.gravity = 0.2; 
-                this.bounceloss = 0.9; // 90% loss in bounce
                 this.rotation = 0; //initial rotation in radians
                 this.rotationSpeed = 0.1; // how fast the rotation happens  
                 this.isRotatingClockwise = true; //initial direction of rotation
@@ -93,7 +91,7 @@
             }
 
             //Check if ball touches paddles
-            checkPaddleHit(paddleBall){
+           /** checkPaddleHit(paddleBall){
                 if(
                     this.yPos + this.radius > paddleBall.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
                 ) {
@@ -114,7 +112,7 @@
                         this.xPos = (this.xPos<0) ? this.radius : canvas.width - this.radius; 
                     }
                 }
-            }  
+            } */ 
 
             //Increase speed of ball
             increaseSpeed(){
@@ -124,8 +122,6 @@
 
             //move method for ball
             move(leftPaddleBall, rightPaddleBall) {
-                //Apply gravity
-                this.ySpeed += this.gravity;
 
                 // Update the y location.
                 this.yPos += this.ySpeed;
@@ -154,14 +150,10 @@
         }
         
         class PaddleBall{
-            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
+            constructor(xPos, yPos, radius = 20) {
                 this.xPos = xPos;
                 this.yPos = yPos;
-                this.xSpeed = xSpeed;
-                this.ySpeed = ySpeed;
-                this.initialXSpeed = xSpeed;
-                this.initialYSpeed = ySpeed;
-                this.radius = radius; //the radius of the peace sign
+                this.radius = radius; //the radius of the balls
             }
 
             //Convert degrees to radians
@@ -185,19 +177,19 @@
         }
         
         //Create the match ball with initial positions and speed
-        var b1 = new matchBall(50, 150, 2, 1);
+        var b1 = new matchBall(canvas.width/2, canvas.height/2, 2, 1);
         //Create right ball
-        var rightPaddleBall = new PaddleBall(canvas.width - 20, (canvas.height / 2) - 30);
+        var rightPaddleBall = new PaddleBall(canvas.width - 30, (canvas.height / 2));
         //Create left ball
-        var leftPaddleBall = new PaddleBall(10, (canvas.height / 2) - 30);
+        var leftPaddleBall = new PaddleBall(30, (canvas.height / 2));
 
         // A function to repeat every time the animation loops.
         function repeatme() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
-            b1.draw(); // Draw the ball (stroked, not filled).
-            b1.move(leftPaddleBall, rightPaddleBall); // Move the ball with paddles
-            rightPaddleBall.draw();// Draw the right ball
-            leftPaddleBall.draw();// Draw the left ball
+            b1.draw(); // Draw the match ball (stroked, not filled).
+            b1.move(leftPaddleBall, rightPaddleBall); // Move the ball with ball paddles
+            rightPaddleBall.draw();// Draw the right paddle ball
+            leftPaddleBall.draw();// Draw the left paddle ball
             window.requestAnimationFrame(repeatme);
         }
 
@@ -257,28 +249,28 @@
                     console.log('s key pressed!');
                     break;
 
-                // Increase rotation speed with +
+                // Increase match ball rotation speed with +
                 case 187:
                     b1.rotationSpeed += 0.05;
                     break;
 
-                // Decrease rotation speed with -
+                // Decrease match ball rotation speed with -
                 case 189:
                     b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
                     break;
                 
-                //Increase ball speed with b
+                //Increase match ball speed with b
                 case 66:
                     b1.increaseSpeed();
                     console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed)   ;
                     break;
                                         
-                // change rotation direction with c
+                // change match ball rotation direction with c
                 case 67:
                     b1.isRotatingClockwise = !b1.isRotatingClockwise;
                     break;    
 
-                //Reset rotation speed and ball speed to default with r
+                //Reset match ball rotation speed and speed to default with r
                 case 82:
                     b1.rotationSpeed = 0.1;
                     b1.xSpeed = b1.initialXSpeed;
