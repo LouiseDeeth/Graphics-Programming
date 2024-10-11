@@ -127,16 +127,10 @@
                 this.yPos += this.ySpeed;
                 this.xPos += this.xSpeed;
 
-                //Bounce off the top
-                if (this.yPos < this.radius) {
-                    this.ySpeed = this.radius;
+                //Bounce off the top & bottom
+                if (this.yPos > (canvas.height - this.radius) || this.yPos < this.radius){
                     this.ySpeed = this.ySpeed * -1; //reverse y direction
-                }
-
-                //Bounce off the bottom and apply bounce loss
-                if (this.yPos > canvas.height - this.radius) {
-                    this.yPos = canvas.height - this.radius;
-                    this.ySpeed = this.ySpeed * -1; //reverse y direction
+                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
                 }
 
                 //Bounce off the left & right
@@ -144,8 +138,8 @@
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
                 } 
                 // Bounce off paddles
-                this.checkPaddleHit(leftPaddleBall);
-                this.checkPaddleHit(rightPaddleBall);          
+                //this.checkPaddleHit(leftPaddleBall);
+                //this.checkPaddleHit(rightPaddleBall);          
             }
         }
         
@@ -188,8 +182,8 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
             b1.draw(); // Draw the match ball (stroked, not filled).
             b1.move(leftPaddleBall, rightPaddleBall); // Move the ball with ball paddles
-            rightPaddleBall.draw();// Draw the right paddle ball
-            leftPaddleBall.draw();// Draw the left paddle ball
+            //rightPaddleBall.draw();// Draw the right paddle ball
+            //leftPaddleBall.draw();// Draw the left paddle ball
             window.requestAnimationFrame(repeatme);
         }
 
