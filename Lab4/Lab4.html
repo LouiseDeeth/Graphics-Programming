@@ -30,7 +30,7 @@
         // Get a 2D context for the canvas.
         var ctx = canvas.getContext("2d");
 
-        class Ball {
+        class matchBall {
             constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
                 this.xPos = xPos;
                 this.yPos = yPos;
@@ -93,18 +93,18 @@
             }
 
             //Check if ball touches paddles
-            checkPaddleHit(paddle){
+            checkPaddleHit(paddleBall){
                 if(
-                    this.yPos + this.radius > paddle.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
+                    this.yPos + this.radius > paddleBall.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
                 ) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
 
                     // move ball away from paddle
                     if(this.xSpeed > 0){
-                        this.xPos = paddle.x + paddle.width + this.radius + 5;
+                        this.xPos = paddleBall.x + paddleBall.width + this.radius + 5;
                     }
                     else{
-                        this.xPos = paddle.x - this.radius - 5;
+                        this.xPos = paddleBall.x - this.radius - 5;
                     }
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
 
@@ -123,7 +123,7 @@
             }
 
             //move method for ball
-            move(leftPaddle, rightPaddle) {
+            move(leftPaddleBall, rightPaddleBall) {
                 //Apply gravity
                 this.ySpeed += this.gravity;
 
@@ -148,51 +148,56 @@
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
                 } 
                 // Bounce off paddles
-                this.checkPaddleHit(leftPaddle);
-                this.checkPaddleHit(rightPaddle);          
+                this.checkPaddleHit(leftPaddleBall);
+                this.checkPaddleHit(rightPaddleBall);          
             }
         }
         
-        class Paddle{
-            constructor(x, y, width = 10, height = 60) {
-                this.x = x;         
-                this.y = y;
-                this.width = width;
-                this.height = height;
-                this.ySpeed = 25;
-            }
-            
-            draw(){
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+        class PaddleBall{
+            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
+                this.xPos = xPos;
+                this.yPos = yPos;
+                this.xSpeed = xSpeed;
+                this.ySpeed = ySpeed;
+                this.initialXSpeed = xSpeed;
+                this.initialYSpeed = ySpeed;
+                this.radius = radius; //the radius of the peace sign
             }
 
-            move(direction){
-                if(direction === 'up' && this.y > 0){
-                    this.y -= this.ySpeed;
-                }
-                else if(direction === 'down' && this.y + this.height < canvas.height){
-                    this.y += this.ySpeed;
-                } 
+            //Convert degrees to radians
+            //To change from radians to degrees, you need to multiply the number of radians by 180/π.
+            //To convert from degrees to radians, multiply the number of degrees by π/180.
+            toRadians(degrees) {
+                return degrees * Math.PI / 180;
             }
-            moveTo(y){
-                this.y = Math.min(Math.max(0, y - this.height / 2), canvas.height - this.height);
+
+            //Draw method
+            draw() {
+                ctx.save();
+                ctx.translate(this.xPos, this.yPos);
+                ctx.rotate(this.rotation);
+
+                //draw the outer circle
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
+                ctx.stroke();
             }
         }
-
-        //Create the ball with initial positions and speed
-        var b1 = new Ball(50, 150, 2, 1);
-        //Create right paddle rectangle and center based on canvas height
-        var rightPaddle = new Paddle(canvas.width - 20, (canvas.height / 2) - 30);
-        //Create left paddle rectangle and center based on canvas height
-        var leftPaddle = new Paddle(10, (canvas.height / 2) - 30);
+        
+        //Create the match ball with initial positions and speed
+        var b1 = new matchBall(50, 150, 2, 1);
+        //Create right ball
+        var rightPaddleBall = new PaddleBall(canvas.width - 20, (canvas.height / 2) - 30);
+        //Create left ball
+        var leftPaddleBall = new PaddleBall(10, (canvas.height / 2) - 30);
 
         // A function to repeat every time the animation loops.
         function repeatme() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
             b1.draw(); // Draw the ball (stroked, not filled).
-            b1.move(leftPaddle, rightPaddle); // Move the ball with paddles
-            rightPaddle.draw();// Draw the right paddle
-            leftPaddle.draw();// Draw the left paddle
+            b1.move(leftPaddleBall, rightPaddleBall); // Move the ball with paddles
+            rightPaddleBall.draw();// Draw the right ball
+            leftPaddleBall.draw();// Draw the left ball
             window.requestAnimationFrame(repeatme);
         }
 
@@ -211,10 +216,10 @@
                 y: event.clientY - canvasPosition.y
             }
             //Move the paddle to the y coordinate
-            rightPaddle.moveTo(mouse.y);
+            rightPaddleBall.moveTo(mouse.y);
 
             //log where mouse click on console
-            console.log("Paddle move to: " + mouse.y);
+            console.log("PaddleBall move to: " + mouse.y);
         });
 
         // Add a Javascript event listener to the keypress event.
@@ -228,27 +233,27 @@
             console.log(e.which);
             switch (e.which) {
 
-                // key code for up arrow for the right paddle
+                // key code for up arrow for the right paddle ball
                 case 38:
-                    rightPaddle.move('up');
+                    rightPaddleBall.move('up');
                     console.log('up arrow key pressed!');
                     break;
 
-                // key code for down arrow for the right paddle
+                // key code for down arrow for the right paddle ball
                 case 40:
-                    rightPaddle.move('down');
+                    rightPaddleBall.move('down');
                     console.log('down arrow key pressed!');
                     break;
 
-                // key code for up arrow for the left paddle
+                // key code for up arrow for the left paddle ball
                 case 87:
-                    leftPaddle.move('up');
+                    leftPaddleBall.move('up');
                     console.log('w key pressed!');
                     break;
 
-                // key code for down arrow for the left paddle
+                // key code for down arrow for the left paddle ball
                 case 83:
-                    leftPaddle.move('down');
+                    leftPaddleBall.move('down');
                     console.log('s key pressed!');
                     break;
 
