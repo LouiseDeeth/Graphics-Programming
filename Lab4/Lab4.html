@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas</title>
+    <style type="text/css">
+        body {
+            background-color: white;
+        }
+
+        canvas {
+            border: 1px solid #000000;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Louise Deeth</h1>
+
+    <canvas id="canvas-for-ball"></canvas>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript">    
+        // Gets a handle to the element with id canvasOne.
+        var canvas = document.getElementById("canvas-for-ball");
+        //Set height and width of canvas
+        canvas.height = 400;
+        canvas.width = 500;
+        // Get a 2D context for the canvas.
+        var ctx = canvas.getContext("2d");
+
+        class Ball {
+            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
+                this.xPos = xPos;
+                this.yPos = yPos;
+                this.xSpeed = xSpeed;
+                this.ySpeed = ySpeed;
+                this.initialXSpeed = xSpeed;
+                this.initialYSpeed = ySpeed;
+                this.radius = radius; //the radius of the peace sign
+                this.gravity = 0.2; 
+                this.bounceloss = 0.9; // 90% loss in bounce
+                this.rotation = 0; //initial rotation in radians
+                this.rotationSpeed = 0.1; // how fast the rotation happens  
+                this.isRotatingClockwise = true; //initial direction of rotation
+            }
+
+            //Convert degrees to radians
+            //To change from radians to degrees, you need to multiply the number of radians by 180/π.
+            //To convert from degrees to radians, multiply the number of degrees by π/180.
+            toRadians(degrees) {
+                return degrees * Math.PI / 180;
+            }
+
+            //Draw method
+            draw() {
+                ctx.save();
+                ctx.translate(this.xPos, this.yPos);
+                ctx.rotate(this.rotation);
+
+                //draw the outer circle
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
+                ctx.stroke();
+
+                //draw the centre line
+                ctx.beginPath();
+                ctx.moveTo(0, -this.radius);
+                ctx.lineTo(0, this.radius);
+                ctx.stroke();
+
+                //draw the left line
+                let angleL = this.toRadians(135);
+                let xLeft = this.radius * Math.cos(angleL);
+                let yLeft = this.radius * Math.sin(angleL);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(xLeft, yLeft);
+                ctx.stroke();
+
+                //draw the right line
+                let angleR = this.toRadians(45);
+                let xRight = this.radius * Math.cos(angleR);
+                let yRight = this.radius * Math.sin(angleR);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(xRight, yRight);
+                ctx.stroke();
+
+                this.rotation += (this.isRotatingClockwise ? this.rotationSpeed : -this.rotationSpeed);
+                ctx.restore();
+            }
+
+            //Check if ball touches paddles
+            checkPaddleHit(paddle){
+                if(
+                    this.yPos + this.radius > paddle.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
+                ) {
+                    this.xSpeed = this.xSpeed * -1; //reverse x direction
+
+                    // move ball away from paddle
+                    if(this.xSpeed > 0){
+                        this.xPos = paddle.x + paddle.width + this.radius + 5;
+                    }
+                    else{
+                        this.xPos = paddle.x - this.radius - 5;
+                    }
+                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
+
+                    // check if ball is stuch behind paddle amd fix
+                    if(this.xPos < 0 || this.xPos > canvas.width){
+                        this.xSpeed = this.xSpeed * -1; //reverse x direction again
+                        this.xPos = (this.xPos<0) ? this.radius : canvas.width - this.radius; 
+                    }
+                }
+            }  
+
+            //Increase speed of ball
+            increaseSpeed(){
+                this.xSpeed *= 1.1; //increase x speed by 10%
+                this.ySpeed *= 1.1; //increase y speed by 10%
+            }
+
+            //move method for ball
+            move(leftPaddle, rightPaddle) {
+                //Apply gravity
+                this.ySpeed += this.gravity;
+
+                // Update the y location.
+                this.yPos += this.ySpeed;
+                this.xPos += this.xSpeed;
+
+                //Bounce off the top
+                if (this.yPos < this.radius) {
+                    this.ySpeed = this.radius;
+                    this.ySpeed = this.ySpeed * -1; //reverse y direction
+                }
+
+                //Bounce off the bottom and apply bounce loss
+                if (this.yPos > canvas.height - this.radius) {
+                    this.yPos = canvas.height - this.radius;
+                    this.ySpeed = this.ySpeed * -1; //reverse y direction
+                }
+
+                //Bounce off the left & right
+                if (this.xPos > (canvas.width - this.radius) || this.xPos < this.radius) {
+                    this.xSpeed = this.xSpeed * -1; //reverse x direction
+                } 
+                // Bounce off paddles
+                this.checkPaddleHit(leftPaddle);
+                this.checkPaddleHit(rightPaddle);          
+            }
+        }
+        
+        class Paddle{
+            constructor(x, y, width = 10, height = 60) {
+                this.x = x;         
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.ySpeed = 25;
+            }
+            
+            draw(){
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+
+            move(direction){
+                if(direction === 'up' && this.y > 0){
+                    this.y -= this.ySpeed;
+                }
+                else if(direction === 'down' && this.y + this.height < canvas.height){
+                    this.y += this.ySpeed;
+                } 
+            }
+            moveTo(y){
+                this.y = Math.min(Math.max(0, y - this.height / 2), canvas.height - this.height);
+            }
+        }
+
+        //Create the ball with initial positions and speed
+        var b1 = new Ball(50, 150, 2, 1);
+        //Create right paddle rectangle and center based on canvas height
+        var rightPaddle = new Paddle(canvas.width - 20, (canvas.height / 2) - 30);
+        //Create left paddle rectangle and center based on canvas height
+        var leftPaddle = new Paddle(10, (canvas.height / 2) - 30);
+
+        // A function to repeat every time the animation loops.
+        function repeatme() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
+            b1.draw(); // Draw the ball (stroked, not filled).
+            b1.move(leftPaddle, rightPaddle); // Move the ball with paddles
+            rightPaddle.draw();// Draw the right paddle
+            leftPaddle.draw();// Draw the left paddle
+            window.requestAnimationFrame(repeatme);
+        }
+
+        // Get the animation going.
+        repeatme();
+
+        //get offset
+        var canvasPosition = {
+            x: canvas.offsetLeft,
+            y: canvas.offsetTop
+        };
+
+        canvas.addEventListener("click", function (event) {
+            var mouse = {
+                x: event.clientX - canvasPosition.x,
+                y: event.clientY - canvasPosition.y
+            }
+            //Move the paddle to the y coordinate
+            rightPaddle.moveTo(mouse.y);
+
+            //log where mouse click on console
+            console.log("Paddle move to: " + mouse.y);
+        });
+
+        // Add a Javascript event listener to the keypress event.
+        window.addEventListener("keypress", function (event) {
+            // Just log the event to the console.
+            console.log(event);
+        });
+
+        //keypresses with jQuery
+        $(document.body).on('keydown', function (e) {
+            console.log(e.which);
+            switch (e.which) {
+
+                // key code for up arrow for the right paddle
+                case 38:
+                    rightPaddle.move('up');
+                    console.log('up arrow key pressed!');
+                    break;
+
+                // key code for down arrow for the right paddle
+                case 40:
+                    rightPaddle.move('down');
+                    console.log('down arrow key pressed!');
+                    break;
+
+                // key code for up arrow for the left paddle
+                case 87:
+                    leftPaddle.move('up');
+                    console.log('w key pressed!');
+                    break;
+
+                // key code for down arrow for the left paddle
+                case 83:
+                    leftPaddle.move('down');
+                    console.log('s key pressed!');
+                    break;
+
+                // Increase rotation speed with +
+                case 187:
+                    b1.rotationSpeed += 0.05;
+                    break;
+
+                // Decrease rotation speed with -
+                case 189:
+                    b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
+                    break;
+                
+                //Increase ball speed with b
+                case 66:
+                    b1.increaseSpeed();
+                    console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed)   ;
+                    break;
+                                        
+                // change rotation direction with c
+                case 67:
+                    b1.isRotatingClockwise = !b1.isRotatingClockwise;
+                    break;    
+
+                //Reset rotation speed and ball speed to default with r
+                case 82:
+                    b1.rotationSpeed = 0.1;
+                    b1.xSpeed = b1.initialXSpeed;
+                    b1.ySpeed = b1.initialYSpeed;
+                    break   
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
