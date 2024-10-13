@@ -33,6 +33,7 @@
         var collisionTimeout = null;
         var leftPaddleScore = 0;
         var rightPaddleScore = 0;
+        var balls = []; //array to hold matchBall objects
 
         class matchBall {
             constructor(xPos, yPos, xSpeed, ySpeed, radius = 20, color = "yellow") {
@@ -145,7 +146,6 @@
                     let directionY = (this.yPos - PaddleBall.yPos) / distance;
                     this.xPos += directionX * overLap;
                     this.yPos += directionY * overLap;
-
                     displayCollisionMessage("Collision Detected!");
 
                     if (side === 'left') {
@@ -194,6 +194,27 @@
             }
         }
 
+        // add a new matchBall to the array with a click
+        function addNewBall() {
+            let randomX = Math.random() * (canvas.width - 40) + 20;
+            let randomY = Math.random() * (canvas.height - 40) + 20;
+            let randonSpeedX = (Math.random() - 0.5) * 4;
+            let randonSpeedY = (Math.random() - 0.5) * 4;
+            let randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            balls.push(new matchBall(randomX, randomY, randonSpeedX, randonSpeedY, 20, randomColor));
+        }
+
+        //remove ball from array when clicked
+        function removeBallAtClick(x, y) {
+            for (let i = balls.length - 1; i >= 0; i--) {
+                let distance = Math.sqrt(Math.pow(balls[i].xPos - x, 2) + Math.pow(balls[i].yPos - y, 2));
+                if (distance <= balls[i].radius) {
+                    balls.splice(i, 1); // remove the ball from the array
+                    break;
+                }
+            }
+        }
+
         //Display scores
         function displayScores() {
             ctx.fillStyle = "black";
@@ -227,22 +248,24 @@
             }
         }
 
-        //Create the match ball with initial positions and speed
-        var b1 = new matchBall(canvas.width / 2, canvas.height / 2, 2, 1);
-        //Create right ball
-        var rPaddleBall = new PaddleBall(canvas.width - 30, canvas.height / 2, 30);
-        //Create left ball
-        var lPaddleBall = new PaddleBall(30, canvas.height / 2, 30);
+        var rPaddleBall = new PaddleBall(canvas.width - 30, canvas.height / 2, 30); //Create right ball
+        var lPaddleBall = new PaddleBall(30, canvas.height / 2, 30); //Create left ball
+
+        //start with a ball in the array
+        balls.push(new matchBall(canvas.width / 2, canvas.height / 2, 2, 1));
 
         // A function to repeat every time the animation loops.
         function repeatme() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
-            b1.draw(); // Draw the match ball (stroked, not filled).
-            b1.move(lPaddleBall, rPaddleBall); // Move the ball with ball paddles
+            for (let ball of balls) {
+                ball.draw(); // Draw the match ball (stroked, not filled).
+                ball.move(lPaddleBall, rPaddleBall); // Move the ball with ball paddles
+            }
+
             lPaddleBall.draw();// Draw the left paddle ball
             rPaddleBall.draw();// Draw the right paddle ball
             displayMessage(); // display collision message - renders message to canvas. 
-            displayScores();
+            displayScores(); // display the scores
             window.requestAnimationFrame(repeatme);
         }
 
@@ -257,6 +280,19 @@
             //Move the paddleBall to the y coordinate
             rPaddleBall.moveTo(mouse.y);
             //lPaddleBall.moveTo(mouse.y);
+        });
+
+        canvas.addEventListener("dblclick", function () {
+            addNewBall();
+        });
+
+        canvas.addEventListener("click", function (event) {
+            var rect = canvas.getBoundingClientRect();
+            var mouse = {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+            removeBallAtClick(mouse.x, mouse.y); //remove a ball when clicked
         });
 
         //keypresses with jQuery
@@ -289,30 +325,34 @@
 
                 // Increase match ball rotation speed with +
                 case 187:
-                    b1.rotationSpeed += 0.05;
+                    balls.forEach(ball => ball.rotationSpeed += 0.05);
                     break;
 
                 // Decrease match ball rotation speed with -
                 case 189:
-                    b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
+                    balls.forEach(ball => ball.rotationSpeed = Math.max(0, ball.rotationSpeed - 0.05));
                     break;
 
                 //Increase match ball speed with B
                 case 66:
-                    b1.increaseSpeed();
-                    console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed);
+                    balls.forEach(ball => {
+                        ball.increaseSpeed();
+                        console.log("Ball speed increased");
+                    });
                     break;
 
                 // change match ball rotation direction with C
                 case 67:
-                    b1.isRotatingClockwise = !b1.isRotatingClockwise;
+                    balls.forEach(ball => ball.isRotatingClockwise = !ball.isRotatingClockwise);
                     break;
 
                 //Reset match ball rotation speed and speed to default with R
                 case 82:
-                    b1.rotationSpeed = 0.1;
-                    b1.xSpeed = b1.initialXSpeed;
-                    b1.ySpeed = b1.initialYSpeed;
+                    balls.forEach(ball => {
+                        ball.rotationSpeed = 0.1;
+                        ball.xSpeed = ball.initialXSpeed;
+                        ball.ySpeed = ball.initialYSpeed;
+                    });
                     break;
             }
         });
