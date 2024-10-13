@@ -21,7 +21,7 @@
     <canvas id="canvas-for-ball"></canvas>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript">    
+    <script type="text/javascript">
         // Gets a handle to the element with id canvasOne.
         var canvas = document.getElementById("canvas-for-ball");
         //Set height and width of canvas
@@ -91,44 +91,46 @@
             }
 
             //Check if ball touches paddles
-           /** checkPaddleHit(paddleBall){
-                if(
-                    this.yPos + this.radius > paddleBall.y && this.yPos - this.radius < paddle.y + paddle.height && this.xPos + this.radius > paddle.x && this.xPos - this.radius < paddle.x + paddle.width
+            checkPaddleHit(PaddleBall) {
+                if (
+                    this.yPos + this.radius > PaddleBall.yPos - PaddleBall.radius && 
+                    this.yPos - this.radius < PaddleBall.yPos + PaddleBall.radius && 
+                    this.xPos + this.radius > PaddleBall.xPos - PaddleBall.radius &&
+                    this.xPos - this.radius < PaddleBall.xPos + PaddleBall.radius
                 ) {
-                    this.xSpeed = this.xSpeed * -1; //reverse x direction
+                    this.xSpeed = -this.xSpeed; //reverse x direction
 
                     // move ball away from paddle
-                    if(this.xSpeed > 0){
-                        this.xPos = paddleBall.x + paddleBall.width + this.radius + 5;
+                    if (this.xSpeed > 0) {
+                        this.xPos = PaddleBall.xPos + PaddleBall.radius + this.radius + 5;
                     }
-                    else{
-                        this.xPos = paddleBall.x - this.radius - 5;
+                    else {
+                        this.xPos = PaddleBall.xPos - PaddleBall.radius - this.radius - 5;
                     }
-                    this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
 
                     // check if ball is stuch behind paddle amd fix
-                    if(this.xPos < 0 || this.xPos > canvas.width){
-                        this.xSpeed = this.xSpeed * -1; //reverse x direction again
-                        this.xPos = (this.xPos<0) ? this.radius : canvas.width - this.radius; 
+                    if (this.xPos < 0 || this.xPos > canvas.width) {
+                        this.xSpeed = this.xSpeed; //reverse x direction again
+                        this.xPos = (this.xPos < 0) ? this.radius : canvas.width - this.radius;
                     }
                 }
-            } */ 
+            }
 
             //Increase speed of ball
-            increaseSpeed(){
+            increaseSpeed() {
                 this.xSpeed *= 1.1; //increase x speed by 10%
                 this.ySpeed *= 1.1; //increase y speed by 10%
             }
 
             //move method for ball
-            move(leftPaddleBall, rightPaddleBall) {
+            move(lPaddleBall, rPaddleBall) {
 
                 // Update the y location.
                 this.yPos += this.ySpeed;
                 this.xPos += this.xSpeed;
 
                 //Bounce off the top & bottom
-                if (this.yPos > (canvas.height - this.radius) || this.yPos < this.radius){
+                if (this.yPos > (canvas.height - this.radius) || this.yPos < this.radius) {
                     this.ySpeed = this.ySpeed * -1; //reverse y direction
                     this.isRotatingClockwise = !this.isRotatingClockwise; //reverse direction of rotation 
                 }
@@ -136,89 +138,79 @@
                 //Bounce off the left & right
                 if (this.xPos > (canvas.width - this.radius) || this.xPos < this.radius) {
                     this.xSpeed = this.xSpeed * -1; //reverse x direction
-                } 
+                }
                 // Bounce off paddles
-                //this.checkPaddleHit(leftPaddleBall);
-                //this.checkPaddleHit(rightPaddleBall);          
+                this.checkPaddleHit(lPaddleBall);
+                this.checkPaddleHit(rPaddleBall);
             }
         }
-        
-        class PaddleBall{
-            constructor(xPos, yPos, radius = 20) {
+
+        class PaddleBall {
+            constructor(xPos, yPos, radius = 30) {
                 this.xPos = xPos;
                 this.yPos = yPos;
-                this.radius = radius; //the radius of the balls
-            }
-
-            //Convert degrees to radians
-            //To change from radians to degrees, you need to multiply the number of radians by 180/π.
-            //To convert from degrees to radians, multiply the number of degrees by π/180.
-            toRadians(degrees) {
-                return degrees * Math.PI / 180;
+                this.radius = radius; //the radius of the PaddleBalls
+                this.ySpeed = 25;
             }
 
             //Draw method
             draw() {
                 ctx.save();
                 ctx.translate(this.xPos, this.yPos);
-                ctx.rotate(this.rotation);
-
                 //draw the outer circle
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
                 ctx.stroke();
+                ctx.restore();
+            }
+
+            move(direction) {
+                if (direction === 'up' && this.yPos - this.radius > 0) {
+                    this.yPos -= this.ySpeed;
+                }
+                else if (direction === 'down' && this.yPos + this.radius < canvas.height) {
+                    this.yPos += this.ySpeed;
+                }
+            }
+
+            moveTo(y) {
+                this.yPos = Math.min(Math.max(this.radius, y), canvas.height - this.radius);
             }
         }
-        
+
         //Create the match ball with initial positions and speed
-        var b1 = new matchBall(canvas.width/2, canvas.height/2, 2, 1);
+        var b1 = new matchBall(canvas.width / 2, canvas.height / 2, 2, 1);
         //Create right ball
-        var rPaddleBall = new PaddleBall(canvas.width - 30, (canvas.height / 2), 30, 5);
+        var rPaddleBall = new PaddleBall(canvas.width - 30, canvas.height / 2, 30);
         //Create left ball
-        var lPaddleBall = new PaddleBall(30, (canvas.height / 2), 10, 50);
+        var lPaddleBall = new PaddleBall(30, canvas.height / 2, 30);
 
         // A function to repeat every time the animation loops.
         function repeatme() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); //Clear the canvas
             b1.draw(); // Draw the match ball (stroked, not filled).
-            b1.move(leftPaddleBall, rightPaddleBall); // Move the ball with ball paddles
-            rPaddleBall.draw();// Draw the right paddle ball
+            b1.move(lPaddleBall, rPaddleBall); // Move the ball with ball paddles
             lPaddleBall.draw();// Draw the left paddle ball
+            rPaddleBall.draw();// Draw the right paddle ball
             window.requestAnimationFrame(repeatme);
         }
 
         // Get the animation going.
         repeatme();
 
-        //get offset
-        var canvasPosition = {
-            x: canvas.offsetLeft,
-            y: canvas.offsetTop
-        };
-
-        canvas.addEventListener("click", function (event) {
+        canvas.addEventListener("mousemove", function (event) {
             var mouse = {
-                x: event.clientX - canvasPosition.x,
-                y: event.clientY - canvasPosition.y
+                //x: event.clientX - canvas.offsetLeft,
+                y: event.clientY - canvas.offsetTop
             }
-            //Move the paddle to the y coordinate
+            //Move the paddleBall to the y coordinate
             rPaddleBall.moveTo(mouse.y);
-
-            //log where mouse click on console
-            console.log("PaddleBall move to: " + mouse.y);
-        });
-
-        // Add a Javascript event listener to the keypress event.
-        window.addEventListener("keypress", function (event) {
-            // Just log the event to the console.
-            console.log(event);
         });
 
         //keypresses with jQuery
         $(document.body).on('keydown', function (e) {
             console.log(e.which);
             switch (e.which) {
-
                 // key code for up arrow for the right paddle ball
                 case 38:
                     rPaddleBall.move('up');
@@ -252,24 +244,24 @@
                 case 189:
                     b1.rotationSpeed = Math.max(0, b1.rotationSpeed - 0.05);
                     break;
-                
-                //Increase match ball speed with b
+
+                //Increase match ball speed with B
                 case 66:
                     b1.increaseSpeed();
-                    console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed)   ;
+                    console.log("Ball speed increased: xSpeed=", b1.xSpeed, "ySpeed=", b1.ySpeed);
                     break;
-                                        
-                // change match ball rotation direction with c
+
+                // change match ball rotation direction with C
                 case 67:
                     b1.isRotatingClockwise = !b1.isRotatingClockwise;
-                    break;    
+                    break;
 
-                //Reset match ball rotation speed and speed to default with r
+                //Reset match ball rotation speed and speed to default with R
                 case 82:
                     b1.rotationSpeed = 0.1;
                     b1.xSpeed = b1.initialXSpeed;
                     b1.ySpeed = b1.initialYSpeed;
-                    break   
+                    break;
             }
         });
 
