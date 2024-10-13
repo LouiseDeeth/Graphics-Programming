@@ -31,7 +31,7 @@
         var ctx = canvas.getContext("2d");
 
         class matchBall {
-            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20) {
+            constructor(xPos, yPos, xSpeed, ySpeed, radius = 20, color="yellow") {
                 this.xPos = xPos;
                 this.yPos = yPos;
                 this.xSpeed = xSpeed;
@@ -39,6 +39,7 @@
                 this.initialXSpeed = xSpeed;
                 this.initialYSpeed = ySpeed;
                 this.radius = radius; //the radius of the peace sign
+                this.color = color; //colour of the object
                 this.rotation = 0; //initial rotation in radians
                 this.rotationSpeed = 0.1; // how fast the rotation happens  
                 this.isRotatingClockwise = true; //initial direction of rotation
@@ -56,11 +57,13 @@
                 ctx.save();
                 ctx.translate(this.xPos, this.yPos);
                 ctx.rotate(this.rotation);
+                ctx.fillStyle = this.color; // fill colour
 
                 //draw the outer circle
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
                 ctx.stroke();
+                ctx.fill();
 
                 //draw the centre line
                 ctx.beginPath();
@@ -146,10 +149,11 @@
         }
 
         class PaddleBall {
-            constructor(xPos, yPos, radius = 30) {
+            constructor(xPos, yPos, radius = 30, color="blue") {
                 this.xPos = xPos;
                 this.yPos = yPos;
                 this.radius = radius; //the radius of the PaddleBalls
+                this.color = color; //colour of the object
                 this.ySpeed = 25;
             }
 
@@ -157,9 +161,11 @@
             draw() {
                 ctx.save();
                 ctx.translate(this.xPos, this.yPos);
+                ctx.fillStyle = this.color;
                 //draw the outer circle
                 ctx.beginPath();
                 ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);//outer circle
+                ctx.fill();
                 ctx.stroke();
                 ctx.restore();
             }
