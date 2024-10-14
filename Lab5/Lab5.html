@@ -34,7 +34,16 @@
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        renderer.render(scene, camera);
+        var repeatMe = function(){
+            //Code to rotate sphere
+            sphere.rotation.x += 0.01;
+            sphere.rotation.y += 0.01;
+            renderer.render(scene, camera);
+            requestAnimationFrame(repeatMe);
+            console.log('repeatMe');
+        }
+        repeatMe();
+
     </script>
 </body>
 
