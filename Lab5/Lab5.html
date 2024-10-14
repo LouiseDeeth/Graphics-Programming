@@ -26,10 +26,13 @@
         // Implement renderer - Create a WebGL renderer for rendering the scene.
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
-        class Sphere{
-            constructor(xRotation, yRotation, zRotation, xPos){
+        // Encapsulate Sphere as a class
+        class Sphere {
+            constructor(xRotation, yRotation, zRotation, xPos) {
                 xRotation = sphere.rotation.x += 0.01;
                 yRotation = sphere.rotation.y += 0.01;
                 zRotation = sphere.rotation.z += 0.01;
@@ -43,15 +46,18 @@
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
 
-        const spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(50, 50, 50);
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(100, 100, 100);
+        spotLight.castShadow = true;
         scene.add(spotLight);
 
-        var repeatMe = function(){
+        var s1 = new Sphere();
+
+        var repeatMe = function () {
             //Code to rotate sphere
             renderer.render(scene, camera);
             requestAnimationFrame(repeatMe);
-            var s1 = new Sphere();
+            s1.move();
         }
         repeatMe();
 
