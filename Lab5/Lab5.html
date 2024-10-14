@@ -30,9 +30,13 @@
 
         // Define the geometry and material for a sphere.
         const geometry = new THREE.SphereGeometry(15, 32, 16);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
+        const material = new THREE.MeshLambertMaterial({ color: 0xffff00, wireframe: false });
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
+
+        const spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(50, 50, 50);
+        scene.add(spotLight);
 
         var repeatMe = function(){
             //Code to rotate sphere
