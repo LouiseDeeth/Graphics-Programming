@@ -42,6 +42,7 @@
             //Code to rotate sphere
             sphere.rotation.x += 0.01;
             sphere.rotation.y += 0.01;
+            sphere.position.x += 0.05; //move sphere to the right
             renderer.render(scene, camera);
             requestAnimationFrame(repeatMe);
             console.log('repeatMe');
