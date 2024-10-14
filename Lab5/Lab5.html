@@ -30,34 +30,64 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
+        // Define the geometry and material for a sphere.
+        const sphereGeometry = new THREE.SphereGeometry(15, 32, 16);
+        const sphereMaterial = new THREE.MeshLambertMaterial({ color: 0xf7cd03, wireframe: false });
+
         // Encapsulate Sphere as a class
         class Sphere {
-            constructor(xRotation, yRotation, zRotation, xPos) {
-                xRotation = sphere.rotation.x += 0.01;
-                yRotation = sphere.rotation.y += 0.01;
-                zRotation = sphere.rotation.z += 0.01;
-                xPos = sphere.position.x += 0.05; //move sphere to the right
+            constructor(sphereGeometry, sphereMaterial) {
+                this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                this.sphere.castShadow = true;
+                this.sphere.position.y = 20; // raise sphere over ground
+            }
+            move() {
+                this.sphere.rotation.x += 0.01;
+                this.sphere.rotation.y += 0.01;
+                this.sphere.rotation.z += 0.01;
+                this.sphere.position.x += 0.05; //move sphere to the right
             }
         }
 
-        // Define the geometry and material for a sphere.
-        const geometry = new THREE.SphereGeometry(15, 32, 16);
-        const material = new THREE.MeshLambertMaterial({ color: 0xffff00, wireframe: false });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+        // Add plane (ground) below sphere
+        const planeGeometry = new THREE.PlaneGeometry(200, 200);
+        const planeMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x647748, 
+            shininess: 150, 
+            specular: 0x111111 
+        });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.y = -5;
+        plane.receiveShadow = true;
+        scene.add(plane);
 
-        var spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(100, 100, 100);
-        spotLight.castShadow = true;
-        scene.add(spotLight);
+        dirLight = new THREE.DirectionalLight(0xffffff, 3);
+        dirLight.name = 'Dir. Light';
+        dirLight.position.set(10, 10, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.near = 1;
+        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.camera.right = 500;
+        dirLight.shadow.camera.left = - 500;
+        dirLight.shadow.camera.top = 500;
+        dirLight.shadow.camera.bottom = - 500;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
 
-        var s1 = new Sphere();
+        // Add camera helper
+        //var helper = new THREE.CameraHelper(dirLight.shadow.camera);
+        //scene.add(helper);
+
+        var s1 = new Sphere(sphereGeometry, sphereMaterial);
+        scene.add(s1.sphere); // add sphere to the scene
 
         var repeatMe = function () {
             //Code to rotate sphere
+            s1.move();
             renderer.render(scene, camera);
             requestAnimationFrame(repeatMe);
-            s1.move();
         }
         repeatMe();
 
