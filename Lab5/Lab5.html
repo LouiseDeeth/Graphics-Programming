@@ -21,7 +21,7 @@
         // Create a camera with specified properties.
         var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
         // Set camera position
-        camera.position.z = 40;
+        camera.position.z = 80;
 
         // Implement renderer - Create a WebGL renderer for rendering the scene.
         var renderer = new THREE.WebGLRenderer();
@@ -39,13 +39,40 @@
             constructor(sphereGeometry, sphereMaterial) {
                 this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                 this.sphere.castShadow = true;
+                //set initial position
                 this.sphere.position.y = 20; // raise sphere over ground
+                this.sphere.position.x = 0; //move sphere to the right
+                this.sphere.position.z = 0; 
+                // set velocity 
+                this.velocityX = 0.5;
+                this.velocityY = -0.5;
+                //set boundaries x and y axis
+                this.boundaryX = 60;
+                this.groundLevel = -5 + 15;
             }
             move() {
+                // update sphere position based on velocity
+                this.sphere.position.x += this.velocityX;
+                this.sphere.position.y += this.velocityY;
+                //check for collsion and change direction
+                if(this.sphere.position.x >= this.boundaryX || this.sphere.position.x <= -this.boundaryX){
+                    this.velocityX = -this.velocityX; // reverse x velocity (bounce)
+                }
+                if(this.sphere.position.y >= this.boundaryY || this.sphere.position.y <= -this.boundaryY){
+                    this.velocityY = -this.velocityY; // reverse y velocity (bounce)
+                }
+                // check for collision with plane
+                if(this.sphere.position.y <= this.groundLevel){
+                    this.sphere.position.y = this.groundLevel;
+                    this.velocityY = -this.velocityY * 0.9; // reverse and lose energy
+                }
+                else{
+                    this.velocityY -= 0.02; //gravity
+                }
+                // rotate the sphere
                 this.sphere.rotation.x += 0.01;
                 this.sphere.rotation.y += 0.01;
                 this.sphere.rotation.z += 0.01;
-                this.sphere.position.x += 0.05; //move sphere to the right
             }
         }
 
@@ -77,8 +104,8 @@
         scene.add(dirLight);
 
         // Add camera helper
-        //var helper = new THREE.CameraHelper(dirLight.shadow.camera);
-        //scene.add(helper);
+        var helper = new THREE.CameraHelper(dirLight.shadow.camera);
+        scene.add(helper);
 
         var s1 = new Sphere(sphereGeometry, sphereMaterial);
         scene.add(s1.sphere); // add sphere to the scene
