@@ -31,21 +31,23 @@
         document.body.appendChild(renderer.domElement);
 
         // Define the geometry and material for a sphere.
-        const sphereGeometry = new THREE.SphereGeometry(15, 32, 16);
-        const sphereMaterial = new THREE.MeshLambertMaterial({ color: 0xf7cd03, wireframe: false });
+        var sphereRadius = 15;
+        const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 16);
+        const sphereMaterial1 = new THREE.MeshLambertMaterial({ color: 0xf7cd03, wireframe: false });
+        const sphereMaterial2 = new THREE.MeshLambertMaterial({ color: 0xff0000, wireframe: false });
 
         // Encapsulate Sphere as a class
         class Sphere {
-            constructor(sphereGeometry, sphereMaterial) {
+            constructor(sphereGeometry, sphereMaterial, posX, posY, velX, velY) {
                 this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                 this.sphere.castShadow = true;
                 //set initial position
-                this.sphere.position.y = 20; // raise sphere over ground
-                this.sphere.position.x = 0; //move sphere to the right
+                this.sphere.position.y = posY; // raise sphere over ground
+                this.sphere.position.x = posX; //move sphere to the right
                 this.sphere.position.z = 0; 
                 // set velocity 
-                this.velocityX = 0.5;
-                this.velocityY = -0.5;
+                this.velocityX = velX;
+                this.velocityY = velY;
                 //set boundaries x and y axis
                 this.boundaryX = 60;
                 this.groundLevel = -5 + 15;
@@ -94,7 +96,7 @@
         dirLight.position.set(10, 10, 10);
         dirLight.castShadow = true;
         dirLight.shadow.camera.near = 1;
-        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.camera.far = 200;
         dirLight.shadow.camera.right = 500;
         dirLight.shadow.camera.left = - 500;
         dirLight.shadow.camera.top = 500;
@@ -107,12 +109,30 @@
         var helper = new THREE.CameraHelper(dirLight.shadow.camera);
         scene.add(helper);
 
-        var s1 = new Sphere(sphereGeometry, sphereMaterial);
-        scene.add(s1.sphere); // add sphere to the scene
+        var s1 = new Sphere(sphereGeometry, sphereMaterial1, -30, 20, 0.5, -0.5); //yellow sphere
+        var s2 = new Sphere(sphereGeometry, sphereMaterial2, 30, 30, -0.5, 0.4); // red sphere
+        scene.add(s1.sphere, s2.sphere); // add sphere to the scene
 
+        //collision detection
+        function checkCollision(s1,s2){
+            var dx = s1.sphere.position.x - s2.sphere.position.x;
+            var dy = s1.sphere.position.y - s2.sphere.position.y;
+            var dz = s1.sphere.position.z - s2.sphere.position.z;  
+            var distance = Math.sqrt(dx * dx + dy * dy + dz * dz);  
+            var radiusSum = sphereRadius * 2; // Both spheres have the same radius 
+            
+            if (distance < radiusSum){
+                s1.velocityX = -s1.velocityX;
+                s1.velocityY = -s1.velocityY;
+                s2.velocityX = -s2.velocityX;
+                s2.velocityY = -s2.velocityY;                
+            }
+        }
         var repeatMe = function () {
             //Code to rotate sphere
             s1.move();
+            s2.move();
+            checkCollision(s1, s2); // check ball collisions
             renderer.render(scene, camera);
             requestAnimationFrame(repeatMe);
         }
