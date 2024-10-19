@@ -31,7 +31,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Define the geometry and material for a sphere.
-        var sphereRadius = 15;
+        var sphereRadius = 10;
         const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 16);
         const sphereMaterial1 = new THREE.MeshLambertMaterial({ color: 0xf7cd03, wireframe: false });
         const sphereMaterial2 = new THREE.MeshLambertMaterial({ color: 0xff0000, wireframe: false });
@@ -50,7 +50,7 @@
                 this.velocityY = velY;
                 //set boundaries x and y axis
                 this.boundaryX = 60;
-                this.groundLevel = -5 + 15;
+                this.groundLevel = -10 + sphereRadius; // to bounce on plane
             }
             move() {
                 // update sphere position based on velocity
@@ -79,7 +79,7 @@
         }
 
         // Add plane (ground) below sphere
-        const planeGeometry = new THREE.PlaneGeometry(200, 200);
+        const planeGeometry = new THREE.PlaneGeometry(300, 110);
         const planeMaterial = new THREE.MeshPhongMaterial({ 
             color: 0x647748, 
             shininess: 150, 
@@ -87,7 +87,7 @@
         });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -5;
+        plane.position.y = -10;
         plane.receiveShadow = true;
         scene.add(plane);
 
