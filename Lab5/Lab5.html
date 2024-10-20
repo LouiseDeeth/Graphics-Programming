@@ -19,7 +19,7 @@
         var scene = new THREE.Scene();
 
         // Create a camera with specified properties.
-        var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 500);
         // Set camera position
         camera.position.z = 80;
 
@@ -27,105 +27,145 @@
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; //use soft shadows
         document.body.appendChild(renderer.domElement);
+
+        // Add plane (ground) below sphere
+        const planeGeometry = new THREE.PlaneGeometry(200, 50);
+        const planeMaterial = new THREE.MeshPhongMaterial({
+            color: 0x647748,
+            shininess: 150,
+            specular: 0x111111
+        });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2; // rotate plane to make it horizontal
+        plane.position.y = -40; // position the plane under the spheres
+        plane.receiveShadow = true;
+        scene.add(plane);
 
         // Define the geometry and material for a sphere.
         var sphereRadius = 10;
         const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 16);
-        const sphereMaterial1 = new THREE.MeshLambertMaterial({ color: 0xf7cd03, wireframe: false });
-        const sphereMaterial2 = new THREE.MeshLambertMaterial({ color: 0xff0000, wireframe: false });
+        const sphereMaterial1 = new THREE.MeshLambertMaterial({ color: 0xf7cd03 });
+        const sphereMaterial2 = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+        const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
 
         // Encapsulate Sphere as a class
         class Sphere {
-            constructor(sphereGeometry, sphereMaterial, posX, posY, velX, velY) {
-                this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                this.sphere.castShadow = true;
+            constructor(sphereGeometry, sphereMaterial, wireframeMaterial, posX, posY, posZ, velX, velY, velZ) {
+                this.solidSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                this.solidSphere.castShadow = true;
+                //wireframe
+                this.wireframeSphere = new THREE.Mesh(sphereGeometry, wireframeMaterial);      
+                // combine materials
+                this.sphereGroup = new THREE.Group();
+                this.sphereGroup.add(this.solidSphere);
+                this.sphereGroup.add(this.wireframeSphere);
                 //set initial position
-                this.sphere.position.y = posY; // raise sphere over ground
-                this.sphere.position.x = posX; //move sphere to the right
-                this.sphere.position.z = 0; 
+                this.sphereGroup.position.set(posX, posY, posZ);
                 // set velocity 
                 this.velocityX = velX;
                 this.velocityY = velY;
+                this.velocityZ = velZ;
                 //set boundaries x and y axis
-                this.boundaryX = 60;
-                this.groundLevel = -10 + sphereRadius; // to bounce on plane
+                this.boundaryX = 35 - sphereRadius;
+                this.boundaryY = 35 - sphereRadius;
+                this.boundaryZ = 35 - sphereRadius;
+
+                this.groundLevel = plane.position.y + sphereRadius; // to bounce on plane
             }
             move() {
                 // update sphere position based on velocity
-                this.sphere.position.x += this.velocityX;
-                this.sphere.position.y += this.velocityY;
+                this.sphereGroup.position.x += this.velocityX;
+                this.sphereGroup.position.y += this.velocityY;
+                this.sphereGroup.position.z += this.velocityZ;
+
                 //check for collsion and change direction
-                if(this.sphere.position.x >= this.boundaryX || this.sphere.position.x <= -this.boundaryX){
+                if (this.sphereGroup.position.x + sphereRadius >= this.boundaryX || this.sphereGroup.position.x - sphereRadius <= -this.boundaryX) {
                     this.velocityX = -this.velocityX; // reverse x velocity (bounce)
                 }
-                if(this.sphere.position.y >= this.boundaryY || this.sphere.position.y <= -this.boundaryY){
-                    this.velocityY = -this.velocityY; // reverse y velocity (bounce)
+                if (this.sphereGroup.position.y + sphereRadius >= this.boundaryY) {
+                    this.velocityY = -this.velocityY; // reverse y velocity (bounce) on ceiling because plane on bottom
+                }
+                if (this.sphereGroup.position.z + sphereRadius >= this.boundaryZ || this.sphereGroup.position.z - sphereRadius <= -this.boundaryZ) {
+                    this.velocityZ = -this.velocityZ; // reverse z velocity (bounce)
                 }
                 // check for collision with plane
-                if(this.sphere.position.y <= this.groundLevel){
-                    this.sphere.position.y = this.groundLevel;
+                if (this.sphereGroup.position.y <= this.groundLevel) {
+                    this.sphereGroup.position.y = this.groundLevel;
                     this.velocityY = -this.velocityY * 0.9; // reverse and lose energy
                 }
-                else{
+                else {
                     this.velocityY -= 0.02; //gravity
                 }
                 // rotate the sphere
-                this.sphere.rotation.x += 0.01;
-                this.sphere.rotation.y += 0.01;
-                this.sphere.rotation.z += 0.01;
+                this.sphereGroup.rotation.x += 0.01;
+                this.sphereGroup.rotation.y += 0.01;
+                this.sphereGroup.rotation.z += 0.01;
             }
         }
 
-        // Add plane (ground) below sphere
-        const planeGeometry = new THREE.PlaneGeometry(300, 110);
-        const planeMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x647748, 
-            shininess: 150, 
-            specular: 0x111111 
-        });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -10;
-        plane.receiveShadow = true;
-        scene.add(plane);
-
+        // Create a directional light for the sphere
         dirLight = new THREE.DirectionalLight(0xffffff, 3);
-        dirLight.name = 'Dir. Light';
-        dirLight.position.set(10, 10, 10);
+        dirLight.position.set(10, 30, 0); // 
         dirLight.castShadow = true;
         dirLight.shadow.camera.near = 1;
-        dirLight.shadow.camera.far = 200;
+        dirLight.shadow.camera.far = 500;
         dirLight.shadow.camera.right = 500;
         dirLight.shadow.camera.left = - 500;
         dirLight.shadow.camera.top = 500;
         dirLight.shadow.camera.bottom = - 500;
         dirLight.shadow.mapSize.width = 1024;
         dirLight.shadow.mapSize.height = 1024;
-        scene.add(dirLight);
+        scene.add(dirLight); // add the light
+
+        // Add slightly transparent cube
+        const boxGeometry = new THREE.BoxGeometry(70, 70, 70);
+        const boxMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0000FF,
+            transparent: true,
+            opacity: 0.3
+        });
+        const cube = new THREE.Mesh(boxGeometry, boxMaterial);
+        cube.position.set(0, 5, 0);
+        cube.receiveShadow = true;
+        scene.add(cube); // add the cube
 
         // Add camera helper
         var helper = new THREE.CameraHelper(dirLight.shadow.camera);
         scene.add(helper);
 
-        var s1 = new Sphere(sphereGeometry, sphereMaterial1, -30, 20, 0.5, -0.5); //yellow sphere
-        var s2 = new Sphere(sphereGeometry, sphereMaterial2, 30, 30, -0.5, 0.4); // red sphere
-        scene.add(s1.sphere, s2.sphere); // add sphere to the scene
+        var s1 = new Sphere(sphereGeometry, sphereMaterial1, wireframeMaterial, -20, 20, 0, 0.5, -0.5, 0.3); //yellow sphere
+        var s2 = new Sphere(sphereGeometry, sphereMaterial2, wireframeMaterial, 20, -20, 10, -0.5, 0.4, -0.3); // red sphere
+        scene.add(s1.sphereGroup, s2.sphereGroup); // add sphere to the scene
 
         //collision detection
-        function checkCollision(s1,s2){
-            var dx = s1.sphere.position.x - s2.sphere.position.x;
-            var dy = s1.sphere.position.y - s2.sphere.position.y;
-            var dz = s1.sphere.position.z - s2.sphere.position.z;  
-            var distance = Math.sqrt(dx * dx + dy * dy + dz * dz);  
+        function checkCollision(s1, s2) {
+            var dx = s1.sphereGroup.position.x - s2.sphereGroup.position.x;
+            var dy = s1.sphereGroup.position.y - s2.sphereGroup.position.y;
+            var dz = s1.sphereGroup.position.z - s2.sphereGroup.position.z;
+            var distance = Math.sqrt(dx * dx + dy * dy + dz * dz); // calculate the distance bwtween the sphereGroups
             var radiusSum = sphereRadius * 2; // Both spheres have the same radius 
-            
-            if (distance < radiusSum){
+
+
+            // reverse velocity for sphereGroups if they collide
+            if (distance < radiusSum) {
                 s1.velocityX = -s1.velocityX;
                 s1.velocityY = -s1.velocityY;
+                s1.velocityZ = -s1.velocityZ;
                 s2.velocityX = -s2.velocityX;
-                s2.velocityY = -s2.velocityY;                
+                s2.velocityY = -s2.velocityY;
+                s2.velocityZ = -s2.velocityZ;
+
+                //Seperate balls so that they don't overlap
+                const overlap = radiusSum - distance;
+                const adjust = overlap / 2;
+                s1.sphereGroup.position.x += adjust * (dx / distance);
+                s1.sphereGroup.position.y += adjust * (dy / distance);
+                s1.sphereGroup.position.z += adjust * (dz / distance);
+                s2.sphereGroup.position.x -= adjust * (dx / distance);
+                s2.sphereGroup.position.y -= adjust * (dy / distance);
+                s2.sphereGroup.position.z -= adjust * (dz / distance);
             }
         }
         var repeatMe = function () {
