@@ -31,7 +31,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Add plane (ground) below sphere
-        const planeGeometry = new THREE.PlaneGeometry(200, 50);
+        const planeGeometry = new THREE.PlaneGeometry(200, 200);
         const planeMaterial = new THREE.MeshPhongMaterial({
             color: 0x647748,
             shininess: 150,
@@ -39,7 +39,7 @@
         });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = -Math.PI / 2; // rotate plane to make it horizontal
-        plane.position.y = -40; // position the plane under the spheres
+        plane.position.y = -30; // position the plane under the spheres
         plane.receiveShadow = true;
         scene.add(plane);
 
@@ -55,8 +55,7 @@
             constructor(sphereGeometry, sphereMaterial, wireframeMaterial, posX, posY, posZ, velX, velY, velZ) {
                 this.solidSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
                 this.solidSphere.castShadow = true;
-                //wireframe
-                this.wireframeSphere = new THREE.Mesh(sphereGeometry, wireframeMaterial);      
+                this.wireframeSphere = new THREE.Mesh(sphereGeometry, wireframeMaterial); //wireframe     
                 // combine materials
                 this.sphereGroup = new THREE.Group();
                 this.sphereGroup.add(this.solidSphere);
@@ -67,11 +66,10 @@
                 this.velocityX = velX;
                 this.velocityY = velY;
                 this.velocityZ = velZ;
-                //set boundaries x and y axis
-                this.boundaryX = 35 - sphereRadius;
-                this.boundaryY = 35 - sphereRadius;
-                this.boundaryZ = 35 - sphereRadius;
-
+                //set boundaries x and y axis - half of cube size 35
+                this.boundaryX = 35;
+                this.boundaryY = 35;
+                this.boundaryZ = 35;
                 this.groundLevel = plane.position.y + sphereRadius; // to bounce on plane
             }
             move() {
