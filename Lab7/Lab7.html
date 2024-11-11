@@ -1,70 +1,79 @@
 <!DOCTYPE html>
 <html>
- <head>
- <title>D3.js Demo</title>
- <meta charset="UTF-8">
- <style type="text/css"></style>
- <!--Import jquery.com-->
- <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
- <!--Import Three.js CDN-->
- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+
+<head>
+    <title>D3.js Demo</title>
+    <meta charset="UTF-8">
+    <style type="text/css"></style>
+    <!--Import jquery.com-->
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <!--Import 3D.js CDN-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
- <body>
+
+<body>
     <h1>Louise Deeth</h1>
- <script type="text/javascript">
-    //JSON call to api data
-    $.getJSON("https://tinyurl.com/k4chnujx", function (data) {
-        //print to console
-        console.log(data);
-        //call function
-        plotCO2Data(data);
-    });
+    <script type="text/javascript">
+        //JSON call to api data
+        $.getJSON("https://tinyurl.com/k4chnujx", function (data) {
+            //print to console
+            console.log(data);
+            //call function
+            plotCO2Data(data);
+        });
 
-    //plot CO2 graph - executed once file has downloaded
-    function plotCO2Data(data){
-        //Setup SVG sizes and margins
-        var margin = { top: 50, right: 50, bottom: 50, left: 50 },
-        width = 900 - margin.left - margin.right,
-        height =  670 - margin.top - margin.bottom;
+        //plot CO2 graph - executed once file has downloaded
+        function plotCO2Data(data) {
+            //Setup SVG sizes and margins
+            var margin = { top: 50, right: 50, bottom: 50, left: 50 },
+                width = 900 - margin.left - margin.right,
+                height = 670 - margin.top - margin.bottom;
 
-        var y = d3.scaleLinear()
-            .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
-            .range([height, 0]);
+            var y = d3.scaleLinear()
+                .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
+                .range([height, 0]);
 
-        var x = d3.scaleLinear()
-            .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
-            .range([0, width]);
-        
-        //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
-        var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
-            .x(function(d){return x(d["years_before_2023"])})
-            .y(function(d){return y(d["co2_ppmv"])});
+            var x = d3.scaleLinear()
+                .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
+                .range([0, width]);
 
-        //Axes
-        //x is the d3.scaleTime()
-        var xAxis = d3.axisBottom(x)
-            .ticks(3); //specify the number of ticks
+            //Axes
+            //x is the d3.scaleTime()
+            var xAxis = d3.axisBottom(x)
+                .ticks(3); //specify the number of ticks
 
-        //y is the d3.scaleLinear()
-        var yAxis = d3.axisLeft(y)
-            .ticks(3); //specify the number of ticks
+            //y is the d3.scaleLinear()
+            var yAxis = d3.axisLeft(y)
+                .ticks(3); //specify the number of ticks
 
-        var svg = d3.select('body')
-            .append("svg")
+            
+                //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
+            var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
+                .x(function (d) { return x(d["years_before_2023"])})
+                .y(function (d) { return y(d["co2_ppmv"])});
+
+            var svg = d3.select('body')
+                .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
-            .append("g")            
-                .attr("tranform", "translate(" + margin.left + "," + margin.top + ")");
-        
-        svg.append('g') //append a <g> - group element
-            .attr('class', 'x axis')
-            .call(xAxis); //let the axis do its thing
-        
-        svg.append('g')
-            .attr('class', 'y axis') //specify classes
-            .call(yAxis); 
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    }
- </script>
- </body>
+            svg.append('g') //append a <g> - group element
+                .attr('class', 'x axis')
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x).ticks(3, "%"));
+
+            svg.append('g')
+                .attr('class', 'y axis') //specify classes
+                .call(yAxis);
+
+            svg.append("path")  //Add the valueline path
+                .attr("d", valueLine(data))
+                .style("stroke", "red")
+                .style("fill", "none");
+        }
+    </script>
+</body>
+
 </html>
