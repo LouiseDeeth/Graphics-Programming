@@ -34,6 +34,11 @@
         var x = d3.scaleLinear()
             .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
             .range([0, width]);
+        
+        //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
+        var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
+            .x(function(d){return x(d["years_before_2023"])})
+            .y(function(d){return y(d["co2_ppmv"])});
 
         //Axes
         //x is the d3.scaleTime()
@@ -43,11 +48,22 @@
         //y is the d3.scaleLinear()
         var yAxis = d3.axisLeft(y)
             .ticks(3); //specify the number of ticks
+
+        var svg = d3.select('body')
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")            
+                .attr("tranform", "translate(" + margin.left + "," + margin.top + ")");
         
-        //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
-        var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
-            .x(function(d){return x(d["years_before_2023"])})
-            .y(function(d){return y(d["co2_ppmv"])});
+        svg.append('g') //append a <g> - group element
+            .attr('class', 'x axis')
+            .call(xAxis); //let the axis do its thing
+        
+        svg.append('g')
+            .attr('class', 'y axis') //specify classes
+            .call(yAxis); 
+
     }
  </script>
  </body>
