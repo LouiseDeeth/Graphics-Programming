@@ -26,9 +26,29 @@
         var margin = { top: 50, right: 50, bottom: 50, left: 50 },
         width = 900 - margin.left - margin.right,
         height =  670 - margin.top - margin.bottom;
+
+        var y = d3.scaleLinear()
+            .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
+            .range([height, 0]);
+
+        var x = d3.scaleLinear()
+            .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
+            .range([0, width]);
+
+        //Axes
+        //x is the d3.scaleTime()
+        var xAxis = d3.axisBottom(x)
+            .ticks(3); //specify the number of ticks
+
+        //y is the d3.scaleLinear()
+        var yAxis = d3.axisLeft(y)
+            .ticks(3); //specify the number of ticks
+        
+        //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
+        var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
+            .x(function(d){return x(d["years_before_2023"])})
+            .y(function(d){return y(d["co2_ppmv"])});
     }
-
-
  </script>
  </body>
 </html>
