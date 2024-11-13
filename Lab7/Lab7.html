@@ -25,7 +25,7 @@
         //plot CO2 graph - executed once file has downloaded
         function plotCO2Data(data) {
             //Setup SVG sizes and margins
-            var margin = { top: 50, right: 50, bottom: 50, left: 50 },
+            var margin = { top: 50, right: 50, bottom: 75, left: 75 },
                 width = 900 - margin.left - margin.right,
                 height = 670 - margin.top - margin.bottom;
 
@@ -39,15 +39,11 @@
 
             //Axes
             //x is the d3.scaleTime()
-            var xAxis = d3.axisBottom(x)
-                .ticks(3); //specify the number of ticks
-
+            var xAxis = d3.axisBottom(x).ticks(3); //specify the number of ticks
             //y is the d3.scaleLinear()
-            var yAxis = d3.axisLeft(y)
-                .ticks(3); //specify the number of ticks
+            var yAxis = d3.axisLeft(y).ticks(3); //specify the number of ticks
 
-            
-                //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
+            //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
             var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
                 .x(function (d) { return x(d["years_before_2023"])})
                 .y(function (d) { return y(d["co2_ppmv"])});
@@ -62,7 +58,7 @@
             svg.append('g') //append a <g> - group element
                 .attr('class', 'x axis')
                 .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x).ticks(3, "%"));
+                .call(xAxis);
 
             svg.append('g')
                 .attr('class', 'y axis') //specify classes
@@ -72,6 +68,32 @@
                 .attr("d", valueLine(data))
                 .style("stroke", "red")
                 .style("fill", "none");
+
+            //Create Title 
+            svg.append("text")
+                .attr("x", width / 2 )
+                .attr("y", -10)
+                .style("text-anchor", "middle")
+                .style("font-size", "25px")
+                .text("CO2 Levels");
+
+            //Create X axis label   
+            svg.append("text")
+                .attr("x", width / 2 )
+                .attr("y",  height + margin.bottom - 30)
+                .style("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("Years Before 2023");
+
+            //Create Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0-margin.left + 10)
+                .attr("x",0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("CO2 (ppmv)");     
         }
     </script>
 </body>
