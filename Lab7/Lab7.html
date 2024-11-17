@@ -25,28 +25,50 @@
         //plot CO2 graph - executed once file has downloaded
         function plotCO2Data(data) {
             //Setup SVG sizes and margins
-            var margin = { top: 50, right: 50, bottom: 75, left: 75 },
+            var margin = { top: 50, right: 75, bottom: 75, left: 75 },
                 width = 900 - margin.left - margin.right,
                 height = 670 - margin.top - margin.bottom;
-
-            var y = d3.scaleLinear()
-                .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
-                .range([height, 0]);
 
             var x = d3.scaleLinear()
                 .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
                 .range([0, width]);
 
+            var yCO2 = d3.scaleLinear()
+                .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
+                .range([height, 0]);
+
+            var yTempMethane = d3.scaleLinear()
+                .domain([
+                    Math.min(
+                        d3.min(data, function (d) { return d["temp_anomaly"] * 100; }),
+                        d3.min(data, function (d) { return d["ch4_ppb"]; })
+                    ),
+                    Math.max(
+                        d3.max(data, function (d) { return d["temp_anomaly"] * 100; }),
+                        d3.max(data, function (d) { return d["ch4_ppb"]; })
+                    )
+                ])
+                .range([height, 0]);
+
             //Axes
             //x is the d3.scaleTime()
-            var xAxis = d3.axisBottom(x).ticks(3); //specify the number of ticks
+            var xAxis = d3.axisBottom(x).ticks(5); //specify the number of ticks
             //y is the d3.scaleLinear()
-            var yAxis = d3.axisLeft(y).ticks(3); //specify the number of ticks
+            var yAxisCO2 = d3.axisLeft(yCO2).ticks(5); //specify the number of ticks for CO2
+            var yAxisTempMethane = d3.axisRight(yTempMethane).ticks(7); //specify the number of ticks for temp and methane
 
             //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
-            var valueLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
-                .x(function (d) { return x(d["years_before_2023"])})
-                .y(function (d) { return y(d["co2_ppmv"])});
+            var co2Line = d3.line()    //draw line - map x, y coords for each data point using the scales 
+                .x(function (d) { return x(d["years_before_2023"]);})
+                .y(function (d) { return yCO2(d["co2_ppmv"]);});
+
+            var tempLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
+                .x(function (d) { return x(d["years_before_2023"]);})
+                .y(function (d) { return yTempMethane(d["temp_anomaly"] * 100);});
+
+            var methaneLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
+                .x(function (d) { return x(d["years_before_2023"]);})
+                .y(function (d) { return yTempMethane(d["ch4_ppb"]);});
 
             var svg = d3.select('body')
                 .append("svg")
@@ -55,18 +77,48 @@
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            //add x-axis
             svg.append('g') //append a <g> - group element
                 .attr('class', 'x axis')
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
 
+            //add y-axis for CO2 (left)
             svg.append('g')
-                .attr('class', 'y axis') //specify classes
-                .call(yAxis);
+                .attr('class', 'y axis co2-axis') //specify classes
+                .call(yAxisCO2);
 
-            svg.append("path")  //Add the valueline path
-                .attr("d", valueLine(data))
+            //add y-axis for temp and methane (right)
+            svg.append('g')
+                .attr('class', 'y axis temp-methane-axis') //specify classes
+                .attr("transform", "translate(" + width + ",0)")
+                .call(yAxisTempMethane);                    
+
+            //draw CO2 line
+            svg.append("path")  //Add the co2line path
+                .datum(data)
+                .attr("class", "line co2-line")
+                .attr("d", co2Line)
                 .style("stroke", "red")
+                .style("stroke-width", "2px")
+                .style("fill", "none");
+
+            //draw temp line
+            svg.append("path")  //Add the tempLine path
+                .datum(data)
+                .attr("class", "line temp-line")
+                .attr("d", tempLine)
+                .style("stroke", "blue")
+                .style("stroke-width", "2px")
+                .style("fill", "none");
+
+            //draw methane line
+            svg.append("path")  //Add the tempLine path
+                .datum(data)
+                .attr("class", "line methane-line")
+                .attr("d", methaneLine)
+                .style("stroke", "green")
+                .style("stroke-width", "2px")
                 .style("fill", "none");
 
             //Create Title 
@@ -75,7 +127,7 @@
                 .attr("y", -10)
                 .style("text-anchor", "middle")
                 .style("font-size", "25px")
-                .text("CO2 Levels");
+                .text("CO2, Temperature Anomaly & Methane Levels Over Time");
 
             //Create X axis label   
             svg.append("text")
@@ -85,7 +137,7 @@
                 .style("font-size", "16px")
                 .text("Years Before 2023");
 
-            //Create Y axis label
+            //Create left Y axis label
             svg.append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 0-margin.left + 10)
@@ -94,6 +146,16 @@
                 .style("text-anchor", "middle")
                 .style("font-size", "16px")
                 .text("CO2 (ppmv)");     
+
+            //Create right Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", margin.right + width - 20)
+                .attr("x",0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text("Temperature Anomaly (celcius) & Methane");     
         }
     </script>
 </body>
