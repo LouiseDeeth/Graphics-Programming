@@ -2,9 +2,18 @@
 <html>
 
 <head>
-    <title>D3.js Demo</title>
+    <title>D3.js with Zoom and Brush</title>
     <meta charset="UTF-8">
-    <style type="text/css"></style>
+    <style type="text/css">
+        .brush .selection {
+            fill: #ccc;
+            stroke: #999;
+        }
+
+        .zoom {
+            cursor: move;
+        }
+    </style>
     <!--Import jquery.com-->
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
     <!--Import 3D.js CDN-->
@@ -17,7 +26,7 @@
         //JSON call to api data
         $.getJSON("https://tinyurl.com/k4chnujx", function (data) {
             //print to console
-            console.log(data);
+            //console.log(data);
             data = data.slice(0, 2500); //slice data to visualise the past 2500 years
             //call function
             plotCO2Data(data);
@@ -27,45 +36,80 @@
         function plotCO2Data(data) {
             //Setup SVG sizes and margins
             var margin = { top: 75, right: 100, bottom: 75, left: 100 },
+                margin2 = { top: 650, right: 100, bottom: 30, left: 100 },
                 width = 900 - margin.left - margin.right,
-                height = 670 - margin.top - margin.bottom;
+                height = 600 - margin.top - margin.bottom,
+                height2 = 100;
 
             var x = d3.scaleLinear()
-                .domain(d3.extent(data, function (d) { return (d["years_before_2023"]); })) //co2 values
+                .domain(d3.extent(data, d => d["years_before_2023"]))
                 .range([0, width]);
 
             var yCO2 = d3.scaleLinear()
-                .domain(d3.extent(data, function (d) { return d["co2_ppmv"]; }))
+                .domain(d3.extent(data, d => d["co2_ppmv"]))
                 .range([height, 0]);
+
+            var yCO22 = d3.scaleLinear()
+                .domain(yCO2.domain())
+                .range([height2, 0]);
 
             var yTempMethane = d3.scaleLinear()
                 .domain([
-                    Math.min(
-                        d3.min(data, function (d) { return d["temp_anomaly"] * 100; }),
-                        d3.min(data, function (d) { return d["ch4_ppb"]; })
-                    ),
-                    Math.max(
-                        d3.max(data, function (d) { return d["temp_anomaly"] * 100; }),
-                        d3.max(data, function (d) { return d["ch4_ppb"]; })
-                    )
+                    Math.min(d3.min(data, d => d["temp_anomaly"]), d3.min(data, d => d["ch4_ppb"])),
+                    Math.max(d3.max(data, d => d["temp_anomaly"]), d3.max(data, d => d["ch4_ppb"]))
                 ])
                 .range([height, 0]);
+
+            var x2 = d3.scaleLinear()
+                .domain(x.domain())
+                .range([0, width]);
+
+            var y2 = d3.scaleLinear()
+                .range([height2, 0]);
 
             //Axes
             //x is the d3.scaleTime()
             var xAxis = d3.axisBottom(x).ticks(5); //specify the number of ticks
+            var xAxis2 = d3.axisBottom(x2).ticks(5);
             //y is the d3.scaleLinear()
             var yAxisCO2 = d3.axisLeft(yCO2).ticks(5); //specify the number of ticks for CO2
             var yAxisTempMethane = d3.axisRight(yTempMethane).ticks(7); //specify the number of ticks for temp and methane
 
+            //brush and zoom
+            var brush = d3.brushX()
+                .extent([[0, 0], [width, height2]])
+                .on("brush end", brushed);
+
+            var zoom = d3.zoom()
+                .scaleExtent([1, Infinity])
+                .translateExtent([[0, 0], [width, height]])
+                .extent([[0, 0], [width, height]])
+                .on("zoom", zoomed);
+
+            /*var area = d3.area()
+                .curve(d3.curveMonotoneX)
+                .x(function(d) { return x(d["years_before_2023"]); })
+                .y0(height)
+                .y1(function(d) { return yCO2(d["co2_ppmv"]); });
+
+            var area2 = d3.area()
+                .curve(d3.curveMonotoneX)
+                .x(function(d) { return x2(d["years_before_2023"]); })
+                .y0(height)
+                .y1(function(d) { return yCO2(d["co2_ppmv"]); });*/
+
             //create x and y scales for interpolated CO2 value (y-axis) and time (x-axis)
-            var co2Line = d3.line()    //draw line - map x, y coords for each data point using the scales 
+            var co2Line = d3.line() //draw line - map x, y coords for each data point using the scales 
                 .x(function (d) { return x(d["years_before_2023"]); })
                 .y(function (d) { return yCO2(d["co2_ppmv"]); });
 
+            var co22Line = d3.line() //brush line
+                .x(function (d) { return x2(d["years_before_2023"]); })
+                .y(function (d) { return yCO22(d["co2_ppmv"]); });
+
             var tempLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
                 .x(function (d) { return x(d["years_before_2023"]); })
-                .y(function (d) { return yTempMethane(d["temp_anomaly"] * 100); });
+                .y(function (d) { return yTempMethane(d["temp_anomaly"]); });
 
             var methaneLine = d3.line()    //draw line - map x, y coords for each data point using the scales 
                 .x(function (d) { return x(d["years_before_2023"]); })
@@ -74,124 +118,212 @@
             var svg = d3.select('body')
                 .append("svg")
                 .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
+                .attr("height", height + margin.top + margin.bottom + margin2.top);
+
+            //focus area main chart
+            var focus = svg.append("g")
+                .attr("class", "focus")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            var context = svg.append("g")
+                .attr("class", "context")
+                .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+            svg.append("defs").append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("width", width)
+                .attr("height", height);
+
+            //draw lines in focus
+            focus.append("path")
+                .datum(data)
+                .attr("class", "line co2-line")
+                .attr("d", co2Line)
+                .attr("clip-path", "url(#clip)")
+                .style("stroke", "red")
+                .style("fill", "none");
+
+            focus.append("path")
+                .datum(data)
+                .attr("class", "line temp-line")
+                .attr("d", tempLine)
+                .attr('clip-path', 'url(#clip)')
+                .style("stroke", "blue")
+                .style("fill", "none");
+
+            focus.append("path")
+                .datum(data)
+                .attr("class", "line methane-line")
+                .attr("d", methaneLine)
+                .attr('clip-path', 'url(#clip)')
+                .style("stroke", "green")
+                .style("fill", "none");
+
+            /*focus.append("path")
+                .datum(data)
+                .attr("class", "area")
+                .attr("d", area)
+                .attr('clip-path', 'url(#clip)')
+                .style("fill", "none");
+
+            focus.append("path")
+                .datum(data)
+                .attr("class", "area2")
+                .attr("d", area2)
+                .attr('clip-path', 'url(#clip)')
+                .style("opacity", 0.7)
+                .style("fill", "lightblue");*/
+
             //add x-axis
-            svg.append('g') //append a <g> - group element
+            focus.append('g') //append a <g> - group element
                 .attr('class', 'x axis')
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
 
+             //add x-axis2               
+            context.append('g') //append a <g> - group element
+                .attr('class', 'x axis')
+                .attr("transform", "translate(0," + height2 + ")")
+                .call(xAxis2);
+
             //add y-axis for CO2 (left)
-            svg.append('g')
-                .attr('class', 'y axis co2-axis') //specify classes
+            focus.append('g')
+                .attr('class', 'y axis co2-axis')
                 .call(yAxisCO2);
 
             //add y-axis for temp and methane (right)
-            svg.append('g')
-                .attr('class', 'y axis temp-methane-axis') //specify classes
+            focus.append('g')
+                .attr('class', 'y axis temp-methane-axis')
                 .attr("transform", "translate(" + width + ",0)")
                 .call(yAxisTempMethane);
 
             //draw CO2 line
-            svg.append("path")  //Add the co2line path
+            context.append("path")  //Add the co2line path
                 .datum(data)
-                .attr("class", "line co2-line")
-                .attr("d", co2Line)
-                .style("stroke", "red")
-                .style("stroke-width", "2px")
-                .style("fill", "none");
+                .attr("class", "area")
+                .attr("d", d3.area()
+                .x(function (d) { return x2(d["years_before_2023"]); })
+                .y0(height2) // Bottom of the area
+                .y1(function (d) { return yCO22(d["co2_ppmv"]); }) // Top of the area
+            )
+            .style("fill", "lightblue")
+            .style("opacity", 0.7);
 
-            //draw temp line
-            svg.append("path")  //Add the tempLine path
-                .datum(data)
-                .attr("class", "line temp-line")
-                .attr("d", tempLine)
-                .style("stroke", "blue")
-                .style("stroke-width", "2px")
-                .style("fill", "none");
+            context.append("g")
+                .attr('class', 'x axis')
+                .attr("transform", "translate(0," + height2 + ")")
+                .call(xAxis2);
 
-            //draw methane line
-            svg.append("path")  //Add the methaneLine path
-                .datum(data)
-                .attr("class", "line methane-line")
-                .attr("d", methaneLine)
-                .style("stroke", "green")
-                .style("stroke-width", "2px")
-                .style("fill", "none");
+            context.append("g")
+                .attr("class", "brush")
+                .call(brush);
 
-        var legendData = [
-            {color: "red", label: "CO2 levels"},
-            {color: "blue", label: "Temperature Anomaly"},           
-            {color: "green", label: "Methane levels"}       
-        ];
-
-        var legend = svg.append("g")
-        .attr("class", "legend")
-        .attr("transform", `translate(${500},${margin.top})`); 
-
-        legend.selectAll(".legend-item")
-            .data(legendData)
-            .enter()
-            .append('g')
-            .attr("class", "legend-item")
-            .attr("transform", (d, i) => `translate(0, ${i *20})`) // space vertically
-            .each(function(d){
-                d3.select(this) //colour rectangle
-                    .append("rect")
-                    .attr("x", 0)
-                    .attr("y", 0)
-                    .attr("width", 10)
-                    .attr("height", 10)
-                    .style("fill", d.color);
-                d3.select(this) //label
-                    .append("text")
-                    .attr("x", 20)
-                    .attr("y", 10)
-                    .attr("dy", "0.35em")
-                    .style("font-size", "12px")
-                    .text(d.label);
-            });
+            svg.append("rect")
+                .attr("class", "zoom")
+                .attr("width", width)
+                .attr("height", height)                
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .style("fill", "none")
+                .style("pointer-events", "all")
+                .call(zoom);
 
             //Create Title 
             svg.append("text")
-                .attr("x", width / 2)
-                .attr("y", -10)
+                .attr("x",(width + margin.left + margin.right) / 2)
+                .attr("y",  margin.top / 2)
                 .style("text-anchor", "middle")
                 .style("font-size", "25px")
                 .text("CO2, Temperature Anomaly & Methane Levels Over Time");
 
-            //Create X axis label   
+            //Create X axis label for years before 2023   
             svg.append("text")
-                .attr("x", width / 2)
-                .attr("y", height + margin.bottom - 30)
+                .attr("x", (width + margin.left + margin.right) / 2)
+                .attr("y", height + margin.top + margin.bottom - 10)
                 .style("text-anchor", "middle")
                 .style("font-size", "16px")
                 .text("Years Before 2023");
 
-            //Create left Y axis label
+            //Create left Y axis label for CO2
             svg.append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", 0 - margin.left + 10)
-                .attr("x", 0 - (height / 2))
+                .attr("y", margin.left / 2 - 10)
+                .attr("x", 0 - (height + margin.top + margin.bottom) / 2)
                 .attr("dy", "1em")
                 .style("text-anchor", "middle")
                 .style("font-size", "16px")
                 .text("CO2 (ppmv)");
 
-            //Create right Y axis label
+            //Create right Y axis label for Temperature Anomaly & Methane
             svg.append("text")
                 .attr("transform", "rotate(-90)")
-                .attr("y", margin.right + width - 20)
-                .attr("x", 0 - (height / 2))
+                .attr("y", width + margin.left + margin.right - 30)
+                .attr("x", 0 - (height + margin.top + margin.bottom) / 2)
                 .attr("dy", "1em")
                 .style("text-anchor", "middle")
                 .style("font-size", "16px")
-                .text("Temperature Anomaly (celcius) & Methane");
-        }
+                .text("Temperature Anomaly (Celsius) & Methane");
 
+            //brush function
+            function brushed(event) {
+                if (event.sourceEvent && event.sourceEvent.type === "zoom") return;
+                var s = event.selection || x2.range();
+                x.domain(s.map(x2.invert, x2));
+                focus.select(".line.co2-line").attr("d", co2Line);
+                focus.select(".line.temp-line").attr("d", tempLine);
+                focus.select(".line.methane-line").attr("d", methaneLine);
+                focus.select(".x.axis").call(xAxis);
+                focus.select(".y.axis.co2-axis").call(yAxisCO2);
+                focus.select(".y.axis.temp-methane-axis").call(yAxisTempMethane);
+            }
+
+            //zoom function
+            function zoomed(event) {
+                var t = event.transform;
+                if (!t) return; // ignore zoom-by-brush
+                x.domain(t.rescaleX(x2).domain());
+                focus.select(".line.co2-line").attr("d", co2Line);
+                focus.select(".line.temp-line").attr("d", tempLine);
+                focus.select(".line.methane-line").attr("d", methaneLine);
+                focus.select(".x.axis").call(xAxis);
+                context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+            }
+
+            //Add legend
+            var legendData = [
+                { color: "red", label: "CO2 levels" },
+                { color: "blue", label: "Temperature Anomaly" },
+                { color: "green", label: "Methane levels" }
+            ];
+
+            var legend = svg.append("g")
+                .attr("class", "legend")
+                .attr('transform', `translate(${width - margin.right + 20},${margin.top})`);
+
+            legend.selectAll(".legend-item")
+                .data(legendData)
+                .enter()
+                .append('g')
+                .attr("class", "legend-item")
+                .attr("transform", (d, i) => `translate(0, ${i * 20})`) // space vertically
+                .each(function (d) {
+                    d3.select(this) //colour rectangle
+                        .append("rect")
+                        .attr("x", 0)
+                        .attr("y", 0)
+                        .attr("width", 10)
+                        .attr("height", 10)
+                        .style("fill", d.color);
+
+                    d3.select(this) //label
+                        .append("text")
+                        .attr("x", 20)
+                        .attr("y", 10)
+                        .attr("dy", "0.35em")
+                        .style("font-size", "12px")
+                        .text(d.label);
+                });
+        }
     </script>
 </body>
 
