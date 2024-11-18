@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-nrows = 2
+nrows = 3
 ncols = 3
 
 #img = cv2.imread('ATU.jpg',)
@@ -21,6 +21,7 @@ sobelHorizontal = cv2.Sobel(gray_image,cv2.CV_64F,1,0,ksize=5) # x dir
 sobelVertical = cv2.Sobel(gray_image,cv2.CV_64F,0,1,ksize=5) # y dir
 sobelSum = sobelHorizontal + sobelVertical
 canny = cv2.Canny(gray_image,100,300)
+sobelSumThreshold = (sobelSum,100,300)
 
 #plot multiple images
 plt.subplot(nrows, ncols,1),plt.imshow(cv2. cvtColor(img, cv2. COLOR_BGR2RGB), cmap = 'gray')
@@ -39,5 +40,6 @@ plt.subplot(nrows, ncols,5),plt.imshow(sobelSum, cmap = 'gray')
 plt.title('Sobel Sum'), plt.xticks([]), plt.yticks([])
 plt.subplot(nrows, ncols,6),plt.imshow(canny, cmap = 'gray')
 plt.title('Canny Edge Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(nrows, ncols,7),plt.imshow(sobelSumThreshold, cmap = 'gray')
+plt.title('Sobel Sum with Threshold'), plt.xticks([]), plt.yticks([])
 plt.show()
-
