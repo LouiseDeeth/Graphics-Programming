@@ -14,11 +14,11 @@ cv2. imshow('Grayscale Image', gray_image)
 cv2. waitKey(0) 
 cv2. destroyAllWindows()
 
-#multiple images
-plt.subplot(nrows, ncols,1),plt.imshow(imgOrig, cmap = 'gray')
+#plot multiple images
+plt.subplot(nrows, ncols,1),plt.imshow(img, cmap = 'gray')
 plt.title('Original'), plt.xticks([]), plt.yticks([])
-plt.subplot(nrows, ncols,2),plt.imshow(imgGray, cmap = 'gray')
+plt.subplot(nrows, ncols,2),plt.imshow(gray_image, cmap = 'gray')
 plt.title('GrayScale'), plt.xticks([]), plt.yticks([])
 plt.show()
 
-imgOut = cv2.GaussianBlur(imgIn,(KernelSizeWidth, KernelSizeHeight),0)
+imgOut = cv2.GaussianBlur(img,(ncols, nrows),0)
