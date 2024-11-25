@@ -7,7 +7,8 @@ nrows = 2
 ncols = 3
 
 #load the image
-img = cv2.imread('ATU1.jpg',)
+#img = cv2.imread('ATU1.jpg',)
+img = cv2.imread('OperaHouse.jpg',)
 
 # convert to grayscale
 gray_image = cv2. cvtColor(img, cv2. COLOR_BGR2GRAY)
@@ -36,10 +37,22 @@ corners = np.int0(corners)  #convert corners values to integer
 # create another deep copy
 imgShiTomasi = copy.deepcopy(img) #deep copy of the original img
 
-B, G, R = 0, 255, 0 # green colour for marking the corners
+B, G, R = 255, 0, 0 # blue colour for marking the corners
 for i in corners: 
     x,y = i.ravel() 
     cv2.circle(imgShiTomasi,(x,y),3,(B, G, R),-1) 
+
+# Initiate ORB detector
+orb = cv2.ORB_create()
+
+# find the keypoints with ORB
+kp = orb.detect(img,None)
+ 
+# compute the descriptors with ORB
+kp, des = orb.compute(img, kp)
+ 
+# draw only keypoints location,not size and orientation
+imgORB = cv2.drawKeypoints(img, kp, None, color=(0,255,0), flags=0) # green colour
 
 #plot multiple images
 plt.figure(figsize=(10, 8))
@@ -51,5 +64,7 @@ plt.subplot(nrows, ncols,3),plt.imshow(cv2. cvtColor(imgHarris, cv2. COLOR_BGR2R
 plt.title('Harris Corners'), plt.xticks([]), plt.yticks([])
 plt.subplot(nrows, ncols,4),plt.imshow(cv2. cvtColor(imgShiTomasi, cv2. COLOR_BGR2RGB), cmap = 'gray')
 plt.title('Shi Tomasi Corners'), plt.xticks([]), plt.yticks([])
+plt.subplot(nrows, ncols,5),plt.imshow(cv2. cvtColor(imgORB, cv2. COLOR_BGR2RGB), cmap = 'gray')
+plt.title('ORB Key Features'), plt.xticks([]), plt.yticks([])
 
 plt.show()
