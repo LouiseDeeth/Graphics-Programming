@@ -24,18 +24,18 @@ sobelSum = np.abs(sobelHorizontal + sobelVertical) # use absolute value for proc
 
 #canny edge detection
 canny = cv2.Canny(gray_image,100,300)
-#sobelSumThreshold = (sobelSum,100,300)
+sobelSumThreshold = (sobelSum,100,300)
 
-thresholds = [50, 100, 150, 200] # different thresholds
-thresholed_images =[]
+#thresholds = [50, 100, 150, 200] # different thresholds
+#thresholed_images =[]
 
-for threshold in thresholds:
-    binary_image = np.zeros_like(sobelSum, dtype=np.uint8)
-    for i in range (sobelSum.shape[0]):
-        for j in range (sobelSum.shape[1]):
-            if sobelSum[i, j] > threshold:
-                binary_image[i, j] = 1
-    thresholed_images.append(binary_image)
+#for threshold in thresholds:
+#    binary_image = np.zeros_like(sobelSum, dtype=np.uint8)
+#    for i in range (sobelSum.shape[0]):
+#        for j in range (sobelSum.shape[1]):
+#            if sobelSum[i, j] > threshold:
+#                binary_image[i, j] = 1
+#    thresholed_images.append(binary_image)
 
 #plot multiple images
 plt.subplot(nrows, ncols,1),plt.imshow(cv2. cvtColor(img, cv2. COLOR_BGR2RGB), cmap = 'gray')
@@ -54,6 +54,6 @@ plt.subplot(nrows, ncols,5),plt.imshow(sobelSum, cmap = 'gray')
 plt.title('Sobel Sum'), plt.xticks([]), plt.yticks([])
 plt.subplot(nrows, ncols,6),plt.imshow(canny, cmap = 'gray')
 plt.title('Canny Edge Image'), plt.xticks([]), plt.yticks([])
-plt.subplot(nrows, ncols,7),plt.imshow(sobelSumThreshold, cmap = 'gray')
-plt.title('Sobel Sum with Threshold'), plt.xticks([]), plt.yticks([])
-pl
+#plt.subplot(nrows, ncols,7),plt.imshow(sobelSumThreshold, cmap = 'gray')
+#plt.title('Sobel Sum with Threshold'), plt.xticks([]), plt.yticks([])
+plt.show()
