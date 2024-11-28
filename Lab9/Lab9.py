@@ -2,7 +2,14 @@ import copy
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+from ultralytics import YOLO
 
+# Load a model
+model = YOLO("yolo11n.pt")
+# Train the model
+results = model.predict(source="Cars.mp4", show=True, conf=0.4, save=True)
+print("Processed video saved to 'runs/predict'")
+    
 nrows = 2
 ncols = 3
 
@@ -32,7 +39,7 @@ qualityLevel = 0.01 # minimum accepted quality of corners
 minDistance = 10 # minimum distance between corners
 
 corners = cv2.goodFeaturesToTrack(gray_image,maxCorners,qualityLevel,minDistance) 
-corners = np.int0(corners)  #convert corners values to integer 
+corners = np.intp(corners)  #convert corners values to integer 
 
 # create another deep copy
 imgShiTomasi = copy.deepcopy(img) #deep copy of the original img
